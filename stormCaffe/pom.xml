@@ -29,6 +29,7 @@
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv</artifactId>
             <version>1.2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.bytedeco</groupId>
@@ -37,7 +38,25 @@
         </dependency>
     </dependencies>
     <build>
+        <finalName>stormCaffe-${project.version}</finalName>
         <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

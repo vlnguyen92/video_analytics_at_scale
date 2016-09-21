@@ -13,6 +13,7 @@ import org.bytedeco.javacpp.opencv_core.KeyPoint;
 import org.bytedeco.javacpp.opencv_features2d;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.FrameGrabber.Exception;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import com.clarity.stormCaffe.util.Serializable;
 
@@ -65,12 +66,12 @@ public class FrameRetrieverSpout extends BaseRichSpout {
 
         kp.deallocate();
 
-//        if (Debug.topologyDebugOutput)
-//            System.out.println("Grabber started");
+        //        if (Debug.topologyDebugOutput)
+        //            System.out.println("Grabber started");
 
 
-//        if (Debug.timer)
-//            System.out.println("TIME=" + System.currentTimeMillis());
+        //        if (Debug.timer)
+        //            System.out.println("TIME=" + System.currentTimeMillis());
 
     }
 
@@ -112,7 +113,7 @@ public class FrameRetrieverSpout extends BaseRichSpout {
                 for (int x = 0; x + w <= W; x += dx) {
                     for (int y = 0; y + h <= H; y += dy) {
                         Serializable.PatchIdentifier identifier = new
-                                Serializable.PatchIdentifier(frameId, new Serializable.Rect(x, y, w, h));
+                            Serializable.PatchIdentifier(frameId, new Serializable.Rect(x, y, w, h));
                         collector.emit(PATCH_STREAM, new Values(identifier, patchCount), identifier.toString());
                     }
                 }

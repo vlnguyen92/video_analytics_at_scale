@@ -19,11 +19,13 @@ import com.clarity.stormCaffe.bolt.*;
 
 public class VisionTopology {
     public static void main(String args[]) throws InterruptedException,AlreadyAliveException,InvalidTopologyException,FileNotFoundException {
-        Config conf = readConfig(args[0]);
+//        Config conf = readConfig(args[0]);
+        Config conf = new Config();
+        conf.setDebug(true);
         TopologyBuilder builder = new TopologyBuilder();
 
-        builder.setSpout("frame-getter",new FrameRetrieverSpout(),1).setNumTasks(2);
-        builder.setBolt("dummy",new FrameProcessorBolt(),2).shuffleGrouping("frame-getter");
+        builder.setSpout("frame-getter",new FrameRetrieverSpout(),1).setNumTasks(1);
+        builder.setBolt("dummy",new FrameProcessorBolt(),1).shuffleGrouping("frame-getter");
 
         StormTopology topology = builder.createTopology();
 
