@@ -41,6 +41,10 @@ public class FrameRetrieverSpout extends BaseRichSpout {
     int firstFrameId;
     int lastFrameId;
 
+    public FrameRetrieverSpout(String SOURCE_FILE) {
+        this.SOURCE_FILE = SOURCE_FILE;
+    }
+
     @Override
     public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
 
@@ -57,8 +61,6 @@ public class FrameRetrieverSpout extends BaseRichSpout {
         this.collector = spoutOutputCollector;
         try {
             grabber.start();
-            while (++frameId < firstFrameId)
-                grabber.grab();
 
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
