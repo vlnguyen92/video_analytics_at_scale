@@ -1,4 +1,4 @@
-package nl.tno.stormcv.spout;
+package com.clarity.stormCaffe.spout;
 
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;

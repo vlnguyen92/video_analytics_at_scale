@@ -1,7 +1,7 @@
-package nl.tno.stormcv;
+package com.clarity.stormCaffe.topology;
 
-import nl.tno.stormcv.spout.*;
-import nl.tno.stormcv.bolt.*;
+import com.clarity.stormCaffe.spout.*;
+import com.clarity.stormCaffe.bolt.*;
 
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
@@ -15,7 +15,8 @@ public class WordCountTopology
     {
         TopologyBuilder builder = new TopologyBuilder();
 
-        builder.setSpout("spout", new RandomSentenceSpoutPython(), 1);
+        String file = "/home/lvnguyen/video_data/testvid.mp4";
+        builder.setSpout("spout", new FrameGetterSpout(file), 1);
 
         builder.setBolt("split", new SplitSentenceBolt(), 1).shuffleGrouping("spout");
 
