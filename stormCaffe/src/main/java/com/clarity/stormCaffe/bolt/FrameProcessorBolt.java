@@ -19,22 +19,26 @@ public class FrameProcessorBolt extends BaseRichBolt{
     OutputCollector collector;
 
     @Override 
-    public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+    public void prepare(Map map, TopologyContext topologyContext, OutputCollector collector) {
         this.collector = collector;
     }
     @Override
     public void execute(Tuple tuple) {
         Serializable.CVMat smat = (Serializable.CVMat) tuple.getValueByField("raw-frame");
+        if(smat == null) {
+            System.out.println("NULLPOINTER");
+        }
 
         int W = smat.getCols();
         int H = smat.getRows();
 
-        collector.emit(new Values(H,W));
+//        collector.emit(tuple, new Values(H,W));
         collector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("height","width"));
+        declarer.declare(new Fields());
+//        declarer.declare(new Fields("height","width"));
     }
 }

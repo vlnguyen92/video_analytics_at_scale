@@ -55,10 +55,12 @@ public class FrameGetterSpout extends BaseRichSpout {
         //Emit cv Mat 
         try {
             OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
-            mat = converter.convert(grabber.grab());
+            mat = converter.convert(grabber.grabImage());
+            if (mat != null) {
+                Serializable.CVMat sMat = new Serializable.CVMat(mat);
+                _collector.emit(new Values(sMat));
+            }
             //            mat = new Mat(image);
-            Serializable.CVMat sMat = new Serializable.CVMat(mat);
-            _collector.emit(new Values(sMat));
 
         } catch (FrameGrabber.Exception e){
             e.printStackTrace();

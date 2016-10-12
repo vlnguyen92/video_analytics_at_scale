@@ -29,7 +29,7 @@ public class AddBolt extends BaseRichBolt{
 
         Integer sum = height + width;
 
-        collector.emit(new Values(sum));
+        collector.emit(tuple, new Values(sum));
         collector.ack(tuple);
     }
 

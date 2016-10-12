@@ -34,7 +34,7 @@ public class Test
                 mat = converter.convert(frame);
 
                 //                mat = new opencv_core.Mat(image);
-                System.out.println("dims: " + frame.imageChannels + " " + frame.imageDepth + " " + frame.imageHeight);
+                System.out.println("dims: " + mat.dims());
                 Serializable.CVMat sMat = new Serializable.CVMat(mat);
 
             } catch (FrameGrabber.Exception e){

@@ -21,7 +21,7 @@ public class VisionTopology
 
         builder.setBolt("get-dimension", new FrameProcessorBolt(), 1).shuffleGrouping("spout");
 
-        builder.setBolt("add", new AddBolt(), 1).shuffleGrouping("get-dimension");
+//        builder.setBolt("add", new AddBolt(), 1).shuffleGrouping("get-dimension");
 
         Config conf = new Config();
         conf.setDebug(true);
