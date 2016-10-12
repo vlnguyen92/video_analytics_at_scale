@@ -8,27 +8,28 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.opencv_core;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 
 /**
- * This class provides kryo serialization for the JavaCV's Mat and Rect objects, so that Storm can wrap them in tuples.
- * Serializable.Mat - kryo serializable analog of opencv_core.Mat object.<p>
+ * This class provides kryo serialization for the JavaCV's CVMat and Rect objects, so that Storm can wrap them in tuples.
+ * Serializable.CVMat - kryo serializable analog of opencv_core.Mat object.<p>
  * Serializable.Rect - kryo serializable analog of opencv_core.Rect object.<p>
  * Serializable.PatchIdentifier is also kryo serializable object,
  * which is used to identify each patch of the frame.<p>
  * <p>
  *
  * @author Nurlan Kanapin
- * @see Serializable.Mat
+ * @see Serializable.CVMat
  * @see Serializable.Rect
  * @see Serializable.PatchIdentifier
  */
 public class Serializable {
 
     /**
-     * Kryo Serializable Mat class.
+     * Kryo Serializable CVMat class.
      * Essential fields are image data itself, rows and columns count and type of the data.
      */
-    public static class Mat implements KryoSerializable, java.io.Serializable {
+    public static class CVMat implements KryoSerializable, java.io.Serializable {
         private byte[] data;
         private int rows, cols, type;
 
@@ -44,18 +45,18 @@ public class Serializable {
             return type;
         }
 
-        public Mat() {
+        public CVMat() {
         }
 
         /**
-         * Creates new serializable Mat given its format and data.
+         * Creates new serializable CVMat given its format and data.
          *
-         * @param rows Number of rows in the Mat object
-         * @param cols Number of columns in the Mat object
-         * @param type OpenCV type of the data in the Mat object
+         * @param rows Number of rows in the CVMat object
+         * @param cols Number of columns in the CVMat object
+         * @param type OpenCV type of the data in the CVMat object
          * @param data Byte data containing image.
          */
-        public Mat(int rows, int cols, int type, byte[] data) {
+        public CVMat(int rows, int cols, int type, byte[] data) {
             this.rows = rows;
             this.cols = cols;
             this.type = type;
@@ -63,11 +64,11 @@ public class Serializable {
         }
 
         /**
-         * Creates new serializable Mat from opencv_core.Mat
+         * Creates new serializable CVMat from opencv_core.CVMat
          *
          * @param mat The opencv_core.Mat
          */
-        public Mat(opencv_core.Mat mat) {
+        public CVMat(opencv_core.Mat mat) {
             if (!mat.isContinuous())
                 mat = mat.clone();
 
@@ -76,7 +77,8 @@ public class Serializable {
             this.type = mat.type();
             int size = mat.arraySize();
             this.data = new byte[size];
-            mat.getByteBuffer().get(this.data);
+            ByteBuffer buf = (ByteBuffer) mat.createBuffer();
+            buf.get(this.data);
 
 //            ByteBuffer bb = mat.getByteBuffer();
 //            bb.rewind();
@@ -86,11 +88,11 @@ public class Serializable {
         }
 
         /**
-         * Creates new serializable Mat given its format and data.
+         * Creates new serializable CVMat given its format and data.
          *
          * @param input Byte data containing image.
          */
-        public Mat(byte[] input) {
+        public CVMat(byte[] input) {
             ByteArrayInputStream bis = new ByteArrayInputStream(input);
             ObjectInput in = null;
             try {
@@ -132,7 +134,7 @@ public class Serializable {
             return null;
         }
 
-        public static byte[] toByteArray(Serializable.Mat rawFrame, Serializable.Mat optFlow) {
+        public static byte[] toByteArray(Serializable.CVMat rawFrame, Serializable.CVMat optFlow) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutput out = null;
             try {
@@ -162,11 +164,11 @@ public class Serializable {
             return null;
         }
 
-        public static Serializable.Mat[] toSMat(byte[] input) {
+        public static Serializable.CVMat[] toSCVMat(byte[] input) {
             ByteArrayInputStream bis = new ByteArrayInputStream(input);
             ObjectInput in = null;
-            Serializable.Mat rawFrame = new Serializable.Mat();
-            Serializable.Mat optFlow = new Serializable.Mat();
+            Serializable.CVMat rawFrame = new Serializable.CVMat();
+            Serializable.CVMat optFlow = new Serializable.CVMat();
 
             try {
                 in = new ObjectInputStream(bis);
@@ -189,7 +191,7 @@ public class Serializable {
                     readed += in.read(optFlow.data, readed, size - readed);
                 }
 
-                return new Serializable.Mat[]{rawFrame, optFlow};
+                return new Serializable.CVMat[]{rawFrame, optFlow};
                 //System.out.println("in: " + this.rows + "-" + this.cols + "-" + this.type + "-" + size + "-" + readed);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -199,7 +201,7 @@ public class Serializable {
 
 
         /**
-         * @return Converts this Serializable Mat into JavaCV's Mat
+         * @return Converts this Serializable CVMat into JavaCV's CVMat
          */
         public opencv_core.Mat toJavaCVMat() {
             return new opencv_core.Mat(rows, cols, type, new BytePointer(data));
@@ -525,21 +527,21 @@ public class Serializable {
      * This is a serializable class used for patch identification. Each patch needs to be distinguished form others.
      * Each patch is uniquely identified by the id of its frame and by the rectangle it corresponds to.
      */
-    public static class PatchIdentifierMat implements java.io.Serializable {
+    public static class PatchIdentifierCVMat implements java.io.Serializable {
 
         public PatchIdentifier identifier;
-        public Mat sMat;
+        public CVMat sCVMat;
 
 
         /**
          * Creates PatchIdentifier with given frame id and rectangle.
          * @param frameId
          * @param roi
-         * @param sMat
+         * @param sCVMat
          */
-        public PatchIdentifierMat(int frameId, Rect roi, Mat sMat) {
+        public PatchIdentifierCVMat(int frameId, Rect roi, CVMat sCVMat) {
             this.identifier = new PatchIdentifier(frameId, roi);
-            this.sMat = sMat;
+            this.sCVMat = sCVMat;
         }
 
         /**
@@ -556,7 +558,7 @@ public class Serializable {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            PatchIdentifierMat that = (PatchIdentifierMat) o;
+            PatchIdentifierCVMat that = (PatchIdentifierCVMat) o;
             return this.identifier.equals(that.identifier);
         }
 
@@ -566,7 +568,7 @@ public class Serializable {
         }
     }
 
-    public static byte[] CvMat2ByteArray(opencv_core.Mat mat) {
+    public static byte[] CvCVMat2ByteArray(opencv_core.Mat mat) {
         if (!mat.isContinuous()) {
             mat = mat.clone();
         }
@@ -580,7 +582,8 @@ public class Serializable {
             out.writeInt(mat.arraySize());
 
             byte[] data = new byte[mat.arraySize()];
-            mat.getByteBuffer().get(data);
+            ByteBuffer buf = (ByteBuffer) mat.createBuffer();
+            buf.get(data);
             out.write(data);
             out.close();
             byte[] int_bytes = bos.toByteArray();
@@ -594,7 +597,7 @@ public class Serializable {
         return null;
     }
 
-    public static opencv_core.Mat ByteArray2CvMat(byte[] input){
+    public static opencv_core.Mat ByteArray2CvCVMat(byte[] input){
         ByteArrayInputStream bis = new ByteArrayInputStream(input);
         ObjectInput in = null;
         try {

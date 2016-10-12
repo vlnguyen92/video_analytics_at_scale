@@ -14,7 +14,7 @@ import com.clarity.stormCaffe.util.Serializable;
 
 import java.util.Map;
 
-public class FrameProcessorBolt extends BaseRichBolt{
+public class AddBolt extends BaseRichBolt{
 
     OutputCollector collector;
 
@@ -24,17 +24,17 @@ public class FrameProcessorBolt extends BaseRichBolt{
     }
     @Override
     public void execute(Tuple tuple) {
-        Serializable.CVMat smat = (Serializable.CVMat) tuple.getValueByField("raw-frame");
+        Integer height = tuple.getIntegerByField("height");
+        Integer width = tuple.getIntegerByField("width");
 
-        int W = smat.getCols();
-        int H = smat.getRows();
+        Integer sum = height + width;
 
-        collector.emit(new Values(H,W));
+        collector.emit(new Values(sum));
         collector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("height","width"));
+        declarer.declare(new Fields("total"));
     }
 }
