@@ -38,7 +38,7 @@ public class FrameGetterSpout extends BaseRichSpout {
             SpoutOutputCollector collector) {
         _collector = collector;
         grabber = new FFmpegFrameGrabber(SOURCE_FILE);
-//        KeyPoint kp = new KeyPoint();
+        //        KeyPoint kp = new KeyPoint();
         System.out.println("Created: " + SOURCE_FILE);
 
         try {
@@ -47,8 +47,11 @@ public class FrameGetterSpout extends BaseRichSpout {
             e.printStackTrace();
         }
         _rand = new Random();
-//        kp.deallocate();
+        //        kp.deallocate();
     } 
+
+    Mat mat;
+    IplImage image;
 
     @Override
     public void nextTuple() {
@@ -56,6 +59,21 @@ public class FrameGetterSpout extends BaseRichSpout {
         String[] sentences = new String[]{"Sentence AAA", "Sentence BBB", "Sentence CCC"};
 
         String sentence = sentences[_rand.nextInt(sentences.length)];
+        //Emit cv Mat 
+        try {
+//            image = grabber.grab();
+            OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
+            image = converter.convert(grabber.grab());
+
+            mat = new Mat(image);
+            Serializable.Mat sMat = new Serializable.Mat(mat);
+
+
+            _collector.emit(new Values(sMat));
+        } catch (FrameGrabber.Exception e){
+            e.printStackTrace();
+        }
+
         _collector.emit(new Values(sentence));
     }
 
@@ -71,88 +89,88 @@ public class FrameGetterSpout extends BaseRichSpout {
     }
 }
 /*
-public class FrameRetrieverSpout extends BaseRichSpout {
-    SpoutOutputCollector collector;
-    private String SOURCE_FILE;
-    private FFmpegFrameGrabber grabber;
-    private long lastFrameTime;
-    private int delayInMS;
+   public class FrameRetrieverSpout extends BaseRichSpout {
+   SpoutOutputCollector collector;
+   private String SOURCE_FILE;
+   private FFmpegFrameGrabber grabber;
+   private long lastFrameTime;
+   private int delayInMS;
 
-    public FrameRetrieverSpout(String SOURCE_FILE) {
-        this.SOURCE_FILE = SOURCE_FILE;
-    }
+   public FrameRetrieverSpout(String SOURCE_FILE) {
+   this.SOURCE_FILE = SOURCE_FILE;
+   }
 
-    @Override
-    public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
+   @Override
+   public void open(Map map, TopologyContext topologyContext, SpoutOutputCollector spoutOutputCollector) {
 
-        grabber = new FFmpegFrameGrabber(SOURCE_FILE);
-        KeyPoint kp = new KeyPoint();
-        System.out.println("Created capture: " + SOURCE_FILE);
+   grabber = new FFmpegFrameGrabber(SOURCE_FILE);
+   KeyPoint kp = new KeyPoint();
+   System.out.println("Created capture: " + SOURCE_FILE);
 
-        this.collector = spoutOutputCollector;
-        try {
-            grabber.start();
+   this.collector = spoutOutputCollector;
+   try {
+   grabber.start();
 
-        } catch (FrameGrabber.Exception e) {
-            e.printStackTrace();
-        }
+   } catch (FrameGrabber.Exception e) {
+   e.printStackTrace();
+   }
 
-        kp.deallocate();
-    }
+   kp.deallocate();
+   }
 
-    IplImage image;
-    Mat mat;
+   IplImage image;
+   Mat mat;
 
-    @Override
-    public void nextTuple() {
-        long now = System.currentTimeMillis();
-        if (now - lastFrameTime < delayInMS) {
-            return;
-        } else {
-            lastFrameTime = now;
-        }
+   @Override
+   public void nextTuple() {
+   long now = System.currentTimeMillis();
+   if (now - lastFrameTime < delayInMS) {
+   return;
+   } else {
+   lastFrameTime = now;
+   }
 
-        try {
-            long start = System.currentTimeMillis();
-            OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
+   try {
+   long start = System.currentTimeMillis();
+   OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
 
-            image = converter.convert(grabber.grab());
-            mat = new Mat(image);
+   image = converter.convert(grabber.grab());
+   mat = new Mat(image);
 
-            Serializable.Mat sMat = new Serializable.Mat(mat);
+   Serializable.Mat sMat = new Serializable.Mat(mat);
 
-            double fx = .25, fy = .25;
-            double fsx = .5, fsy = .5;
+   double fx = .25, fy = .25;
+   double fsx = .5, fsy = .5;
 
-            int W = sMat.getCols(), H = sMat.getRows();
-            int w = (int) (W * fx + .5), h = (int) (H * fy + .5);
-            int dx = (int) (w * fsx + .5), dy = (int) (h * fsy + .5);
-            int patchCount = 0;
-            for (int x = 0; x + w <= W; x += dx)
-                for (int y = 0; y + h <= H; y += dy)
-                    patchCount++;
+   int W = sMat.getCols(), H = sMat.getRows();
+   int w = (int) (W * fx + .5), h = (int) (H * fy + .5);
+   int dx = (int) (w * fsx + .5), dy = (int) (h * fsy + .5);
+   int patchCount = 0;
+   for (int x = 0; x + w <= W; x += dx)
+   for (int y = 0; y + h <= H; y += dy)
+   patchCount++;
 
-            collector.emit(RAW_FRAME_STREAM, new Values(sMat, patchCount));
-            for (int x = 0; x + w <= W; x += dx) {
-                for (int y = 0; y + h <= H; y += dy) {
-                    Serializable.PatchIdentifier identifier = new
-                        Serializable.PatchIdentifier(new Serializable.Rect(x, y, w, h));
-                    collector.emit(PATCH_STREAM, new Values(identifier, patchCount), identifier.toString());
-                }
-            }
-            long nowTime = System.currentTimeMillis();
-            System.out.printf("Sendout: " + nowTime + "," + ",used: " + (nowTime -start));
-        } catch (FrameGrabber.Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declareStream(PATCH_STREAM, new Fields(FIELD_PATCH_IDENTIFIER, FIELD_PATCH_COUNT));
-        outputFieldsDeclarer.declareStream(RAW_FRAME_STREAM, new Fields(FIELD_FRAME_ID, FIELD_FRAME_MAT, FIELD_PATCH_COUNT));
-    }
-
-
+   collector.emit(RAW_FRAME_STREAM, new Values(sMat, patchCount));
+   for (int x = 0; x + w <= W; x += dx) {
+   for (int y = 0; y + h <= H; y += dy) {
+   Serializable.PatchIdentifier identifier = new
+   Serializable.PatchIdentifier(new Serializable.Rect(x, y, w, h));
+   collector.emit(PATCH_STREAM, new Values(identifier, patchCount), identifier.toString());
+   }
+   }
+   long nowTime = System.currentTimeMillis();
+System.out.printf("Sendout: " + nowTime + "," + ",used: " + (nowTime -start));
+} catch (FrameGrabber.Exception e) {
+    e.printStackTrace();
 }
+   }
+
+@Override
+public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
+    outputFieldsDeclarer.declareStream(PATCH_STREAM, new Fields(FIELD_PATCH_IDENTIFIER, FIELD_PATCH_COUNT));
+    outputFieldsDeclarer.declareStream(RAW_FRAME_STREAM, new Fields(FIELD_FRAME_ID, FIELD_FRAME_MAT, FIELD_PATCH_COUNT));
+}
+
+
+   }
 */
