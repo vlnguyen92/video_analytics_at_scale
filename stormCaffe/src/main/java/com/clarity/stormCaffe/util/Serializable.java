@@ -69,6 +69,7 @@ public class Serializable {
          * @param mat The opencv_core.Mat
          */
         public CVMat(opencv_core.Mat mat) {
+
             if (!mat.isContinuous())
                 mat = mat.clone();
 
@@ -79,12 +80,13 @@ public class Serializable {
             this.data = new byte[size];
             ByteBuffer buf = (ByteBuffer) mat.createBuffer();
             buf.get(this.data);
+            System.out.println("HERE");
 
-//            ByteBuffer bb = mat.getByteBuffer();
-//            bb.rewind();
-//            this.data = new byte[size];
-//            while (bb.hasRemaining())  // should happen only once
-//                bb.get(this.data);
+            //            ByteBuffer bb = mat.getByteBuffer();
+            //            bb.rewind();
+            //            this.data = new byte[size];
+            //            while (bb.hasRemaining())  // should happen only once
+            //                bb.get(this.data);
         }
 
         /**
@@ -613,7 +615,7 @@ public class Serializable {
             }
 
             return new opencv_core.Mat(rows, cols, type, new BytePointer(data));
-//            System.out.println("in: " + this.rows + "-" + this.cols + "-" + this.type + "-" + input.length + "-" + size + "-" + readed);
+            //            System.out.println("in: " + this.rows + "-" + this.cols + "-" + this.type + "-" + input.length + "-" + size + "-" + readed);
         } catch (IOException e) {
             e.printStackTrace();
         }

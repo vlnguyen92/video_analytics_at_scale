@@ -48,25 +48,17 @@ public class FrameGetterSpout extends BaseRichSpout {
     } 
 
     Mat mat;
-    IplImage image;
 
     @Override
     public void nextTuple() {
 
         //Emit cv Mat 
         try {
-            OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
-            image = converter.convert(grabber.grab());
-
-            mat = new Mat(image);
-            if(null == mat) {
-                System.out.println("DAMNNULL");
-            }
-            else {
-                Serializable.CVMat sMat = new Serializable.CVMat(mat);
-                _collector.emit(new Values(sMat));
-            }
-
+            OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
+            mat = converter.convert(grabber.grab());
+            //            mat = new Mat(image);
+            Serializable.CVMat sMat = new Serializable.CVMat(mat);
+            _collector.emit(new Values(sMat));
 
         } catch (FrameGrabber.Exception e){
             e.printStackTrace();

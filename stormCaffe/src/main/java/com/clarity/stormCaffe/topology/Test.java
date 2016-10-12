@@ -7,6 +7,10 @@ import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameGrabber.Exception;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 
+import org.bytedeco.javacv.Frame;
+
+import com.clarity.stormCaffe.util.Serializable;
+
 public class Test
 {
     private static FFmpegFrameGrabber grabber;
@@ -21,17 +25,17 @@ public class Test
             e.printStackTrace();
         }
         opencv_core.Mat mat;
-        opencv_core.IplImage image;
 
         int count = 0;
         while (count < 10) {
             try {
-                OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
-                image = converter.convert(grabber.grab());
+                OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
+                Frame frame = grabber.grabImage();
+                mat = converter.convert(frame);
 
-                mat = new opencv_core.Mat(image);
-                System.out.println("dims: " + mat.empty());
-                //                Serializable.CVMat sMat = new Serializable.CVMat(mat);
+                //                mat = new opencv_core.Mat(image);
+                System.out.println("dims: " + frame.imageChannels + " " + frame.imageDepth + " " + frame.imageHeight);
+                Serializable.CVMat sMat = new Serializable.CVMat(mat);
 
             } catch (FrameGrabber.Exception e){
                 e.printStackTrace();
