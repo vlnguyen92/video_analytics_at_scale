@@ -6,7 +6,7 @@ TOOL_DIR=~/tools
 
 CORE_NUMBER=$(grep -c ^processor /proc/cpuinfo)
 
-CUDA_REPO_DEB="https://develop.nvidia.com/compute/cuda/8.0/prod/local_installers/cuda-repo-ubuntu1604-8-0-local_8.0.44-1_amd64-deb"
+CUDA_REPO_DEB="https://developer.nvidia.com/compute/cuda/8.0/prod/local_installers/cuda-repo-ubuntu1604-8-0-local_8.0.44-1_amd64-deb"
 CUDNN_INSTALLERS=(
     cudnn-8.0-linux-x64-v5.1.tgz
 #    cudnn-7.0-linux-x64-v4.0-prod.tgz
@@ -26,6 +26,9 @@ set -o pipefail
 ## Helper functions
 download() {
     if [ "$#" -eq 2 ]; then
+        if [ -f "$2/$1" ]; then
+            return
+        fi
         cd "$2" && { curl -OJL "$1" ; cd -; }
     elif [ "$#" -eq 1 ]; then
         mkdir -p $DOWNLOAD_DIR
@@ -91,13 +94,18 @@ prompt() {
 
 info "Script initialization done"
 
-#
-# Generic system update
-#
-
 # Generic system update
 info "Updating system"
 sudo apt-get update && sudo apt-get dist-upgrade -y
+
+# Setup Chameleon Object Store
+info "Authenticating against Chameleon"
+source "$DOWNLOAD_DIR/CH-818207-openrc.sh"
+
+info "Download files from object store"
+cd $DOWNLOAD_DIR
+swift download storm_files cuda-repo-ubuntu1604-8-0-local_8.0.44-1_amd64-deb
+swift download storm_files cudnn-8.0-linux-x64-v5.1.tgz
 
 # Install nvidia driver and cuda
 info "Installing nvidia driver and cuda library"
@@ -106,12 +114,12 @@ sudo apt-get update && sudo apt-get dist-upgrade -y
 sudo apt-get install -y linux-headers-generic
 
 download $CUDA_REPO_DEB
-sudo dpkg -i $DOWNLOAD_DIR/*.deb
+sudo dpkg -i $DOWNLOAD_DIR/cuda-repo-ubuntu1604-8-0-local_8.0.44-1_amd64-deb
 sudo apt-get update && sudo apt-get install -y cuda
 
 # Install other build tools
 info "Installing other build tools"
-sudo apt-get install -y build-essentials cmake maven git gnome-terminal
+sudo apt-get install -y build-essential cmake maven git gnome-terminal
 
 # Setup bash shell
 info "Setting up bash shell"
@@ -154,7 +162,7 @@ mkdir -p $TOOL_DIR $BUILD_DIR
 ## cuDNN
 subinfo "Intalling cuDNN..."
 for cudnn in ${CUDNN_INSTALLERS[@]}; do
-    ### Must be downloaded manually
+    ### Must be downloaded manually (handled by Chameleon object store now)
     if ! [ -f $DOWNLOAD_DIR/$cudnn ]; then
         error "You have to download $cudnn to $DOWNLOAD_DIR before execute this script"
         exit 1
@@ -167,12 +175,6 @@ for cudnn in ${CUDNN_INSTALLERS[@]}; do
     ### refresh PATH and other things
     source ~/.bashrc
 done
-
-## Java bindings for various libraries
-wget -P $DOWNLOAD_DIR http://search.maven.org/remotecontent?filepath=org/bytedeco/javacpp-presets/1.2/javacpp-presets-1.2-bin.zip
-unzip $DOWNLOAD_DIR/*-javacpp-presets-1.2-bin.zip $TOOL_DIR
-mvn install:install-file -Dfile=$TOOL_DIR/javacpp-presets-bin/ffmpeg.jar -DgroupId=org.bytedeco -DartifactId=ffmpeg -Dversion=1.2 -Dpackaging=jar
-git clone https://github.com/vlnguyen92/video_analytics_at_scale.git
 
 ## Caffe
 subinfo "Intalling Caffe from git..."
@@ -196,26 +198,26 @@ make -j$CORE_NUMBER install
 ### refresh PATH and other things
 source ~/.bashrc
 
-## OpenCV
-subinfo "Intalling OpenCV from git..."
-cd $BUILD_DIR
-### dependencies
-sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
-sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
-### source code and config
-git clone https://github.com/opencv/opencv.git
-git clone https://github.com/opencv/opencv_contrib.git
-cd opencv
-mkdir build && cd build
-#### disable cudalegacy, which is incompatible with cuda 8.0
-cmake -DCMAKE_BUILD_TYPE=RELEASE \
-      -DCMAKE_INSTALL_PREFIX=$TOOL_DIR/opencv \
-      -DOPENCV_EXTRA_MODULES_PATH=$BUILD_DIR/opencv_contrib/modules \
-      ..
-### build and install
-make -j$CORE_NUMBER install
-### refresh PATH and other things
-source ~/.bashrc
+### OpenCV
+#subinfo "Intalling OpenCV from git..."
+#cd $BUILD_DIR
+#### dependencies
+#sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+#sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+#### source code and config
+#git clone https://github.com/opencv/opencv.git
+#git clone https://github.com/opencv/opencv_contrib.git
+#cd opencv
+#mkdir build && cd build
+##### disable cudalegacy, which is incompatible with cuda 8.0
+#cmake -DCMAKE_BUILD_TYPE=RELEASE \
+#      -DCMAKE_INSTALL_PREFIX=$TOOL_DIR/opencv \
+#      -DOPENCV_EXTRA_MODULES_PATH=$BUILD_DIR/opencv_contrib/modules \
+#      ..
+#### build and install
+#make -j$CORE_NUMBER install
+#### refresh PATH and other things
+#source ~/.bashrc
 
 ## Zookeeper
 subinfo "Installing Zookeeper 3.4.9"
@@ -311,3 +313,8 @@ install -m755 build/lib/libcaffe.so $TOOL_DIR/caffe_c3d/lib/libc3d_sample_rate.s
 ### restore normal caffe
 mv $TOOL_DIR/caffe.skip $TOOL_DIR/caffe
 source ~/.bashrc
+
+## Our project
+cd $HOME
+git clone https://github.com/vlnguyen92/video_analytics_at_scale.git
+
