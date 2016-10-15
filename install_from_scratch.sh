@@ -119,7 +119,7 @@ sudo apt-get update && sudo apt-get install -y cuda
 
 # Install other build tools
 info "Installing other build tools"
-sudo apt-get install -y build-essential cmake maven git gnome-terminal
+sudo apt-get install -y build-essential cmake maven git gnome-terminal ffmpeg
 
 # Setup bash shell
 info "Setting up bash shell"
@@ -198,26 +198,26 @@ make -j$CORE_NUMBER install
 ### refresh PATH and other things
 source ~/.bashrc
 
-### OpenCV
-#subinfo "Intalling OpenCV from git..."
-#cd $BUILD_DIR
-#### dependencies
-#sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
-#sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
-#### source code and config
-#git clone https://github.com/opencv/opencv.git
-#git clone https://github.com/opencv/opencv_contrib.git
-#cd opencv
-#mkdir build && cd build
-##### disable cudalegacy, which is incompatible with cuda 8.0
-#cmake -DCMAKE_BUILD_TYPE=RELEASE \
-#      -DCMAKE_INSTALL_PREFIX=$TOOL_DIR/opencv \
-#      -DOPENCV_EXTRA_MODULES_PATH=$BUILD_DIR/opencv_contrib/modules \
-#      ..
-#### build and install
-#make -j$CORE_NUMBER install
-#### refresh PATH and other things
-#source ~/.bashrc
+## OpenCV
+subinfo "Intalling OpenCV from git..."
+cd $BUILD_DIR
+### dependencies
+sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+### source code and config
+git clone https://github.com/opencv/opencv.git
+git clone https://github.com/opencv/opencv_contrib.git
+cd opencv
+mkdir build && cd build
+#### disable cudalegacy, which is incompatible with cuda 8.0
+cmake -DCMAKE_BUILD_TYPE=RELEASE \
+      -DCMAKE_INSTALL_PREFIX=$TOOL_DIR/opencv \
+      -DOPENCV_EXTRA_MODULES_PATH=$BUILD_DIR/opencv_contrib/modules \
+      ..
+### build and install
+make -j$CORE_NUMBER install
+### refresh PATH and other things
+source ~/.bashrc
 
 ## Zookeeper
 subinfo "Installing Zookeeper 3.4.9"
@@ -316,5 +316,9 @@ source ~/.bashrc
 
 ## Our project
 cd $HOME
-git clone https://github.com/vlnguyen92/video_analytics_at_scale.git
+if [ -d video_analytics_at_scale ]; then
+    cd video_analytics_at_scale && git pull
+else
+    git clone https://github.com/vlnguyen92/video_analytics_at_scale.git
+fi
 
