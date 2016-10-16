@@ -1,7 +1,6 @@
 package com.clarity.stormCaffe.topology;
 
 import com.clarity.stormCaffe.topology.Classifier;
-import com.clarity.stormCaffe.topology.ClassifierConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,9 +10,12 @@ import java.io.IOException;
 public class CommandLineClassifier {
 
     public static void main(String[] args) throws Exception {
-        ClassifierConfig config = new ClassifierConfig("/model/deploy.prototxt","/model/iter_10000.caffemodel","/model/imagenet_mean.binaryproto","/model/synsets.txt");
-
-        Classifier classifier = new Classifier(config);
+        String rootDir = "/home/lvnguyen/stormSchedulers/video_analytics_at_scale/stormCaffe/";
+        String modelFile = rootDir + "resources/model/deploy.prototxt";
+        String trainFile = rootDir + "resources/model/bvlc_googlenet.caffemodel";
+        String meanFile = rootDir + "resources/model/imagenet_mean.binaryproto";
+        String labelFile = rootDir + "resources/model/synset_words.txt";
+        Classifier classifier= new Classifier(modelFile,trainFile,meanFile,labelFile);
 
         String file = args[0];
         System.out.println(file);
