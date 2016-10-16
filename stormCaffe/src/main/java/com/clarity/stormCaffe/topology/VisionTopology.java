@@ -10,7 +10,7 @@ import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 
-public class WordCountTopology 
+public class VisionTopology 
 {
     public static void main( String[] args ) throws Exception
     {
@@ -19,9 +19,9 @@ public class WordCountTopology
         String file = "/home/lvnguyen/video_data/testvid.mp4";
         builder.setSpout("spout", new FrameGetterSpout(file), 1);
 
-        builder.setBolt("split", new SplitSentenceBolt(), 1).shuffleGrouping("spout");
+        builder.setBolt("get-dimension", new FrameProcessorBolt(), 1).shuffleGrouping("spout");
 
-        builder.setBolt("count", new WordCountBolt(), 1).fieldsGrouping("split", new Fields("dummy"));
+//        builder.setBolt("add", new AddBolt(), 1).shuffleGrouping("get-dimension");
 
         Config conf = new Config();
         conf.setDebug(true);
@@ -29,13 +29,13 @@ public class WordCountTopology
 
         if(args != null && args.length > 0) {
             conf.setNumWorkers(3);
-            StormSubmitter.submitTopologyWithProgressBar("word-count",conf,builder.createTopology());
+            StormSubmitter.submitTopologyWithProgressBar("vision",conf,builder.createTopology());
         }
         else {
             conf.setMaxTaskParallelism(3);
 
             LocalCluster cluster = new LocalCluster();
-            cluster.submitTopology("word-count",conf,builder.createTopology());
+            cluster.submitTopology("vision",conf,builder.createTopology());
 
             Thread.sleep(100000);
             cluster.shutdown();

@@ -1,1 +1,5 @@
 */target/*
+
+# Intellij IDEA project
+*/.idea
+*.iml
