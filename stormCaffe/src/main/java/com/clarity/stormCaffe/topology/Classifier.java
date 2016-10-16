@@ -8,15 +8,13 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.ae.caffeserver.util.Utils;
+import com.clarity.stormCaffe.util.Utils;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.indexer.FloatRawIndexer;
 import org.bytedeco.javacpp.opencv_core.*;
 import org.bytedeco.javacpp.caffe.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
@@ -213,6 +211,5 @@ public class Classifier {
 		Mat matImage = imread(fname, -1);
 		return classify(matImage, amount);
 	}
-
 
 }
