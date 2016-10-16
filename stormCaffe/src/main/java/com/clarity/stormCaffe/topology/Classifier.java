@@ -13,8 +13,8 @@ import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.indexer.FloatRawIndexer;
 import org.bytedeco.javacpp.opencv_core.*;
 import org.bytedeco.javacpp.caffe.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
@@ -24,7 +24,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
 public class Classifier {
 
-	private final Logger log = LoggerFactory.getLogger(getClass());
+//	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	private FloatNet  net_;
 
@@ -44,7 +44,7 @@ public class Classifier {
 		return currentConfig != null;
 	}
 
-	public Classifier(ClassifierConfig config) {
+	public Classifier(ClassifierConfig config) throws IOException {
 		if (config.equals(currentConfig)) {
 			return;
 		}
@@ -188,7 +188,7 @@ public class Classifier {
 				"Expected a probability for every class");
 		List<Prediction> predictions = new ArrayList<>();
 		for (int i = 0; i < output.size(); i++) {
-			log.info(String.format("Read: %s as prediction", output.get(i)));
+//			log.info(String.format("Read: %s as prediction", output.get(i)));
 			predictions.add(new Prediction(labels_.get(i), output.get(i)));
 		}
 		return predictions.stream()
