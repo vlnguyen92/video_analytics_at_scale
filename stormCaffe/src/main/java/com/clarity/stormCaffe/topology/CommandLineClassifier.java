@@ -10,30 +10,13 @@ import java.io.IOException;
 
 public class CommandLineClassifier {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
-
-    private Classifier classifier;
-
-    private ClassifierConfig config;
-
-    private void init() {
-        try {
-            classifier.setUp(config);
-
-        } catch (IOException e) {
-            log.error("Could not initialize", e);
-
-        }
-
-    }
-
     public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
-            throw new IllegalArgumentException("Expected [-m | -i] file");
-        }
+        ClassifierConfig config = new ClassifierConfig("/model/deploy.prototxt","/model/iter_10000.caffemodel","/model/imagenet_mean.binaryproto","/model/synsets.txt");
 
-        String file = args[1];
+        Classifier classifier = new Classifier(config);
+
+        String file = args[0];
         System.out.println(file);
-//        log.info("Classified as: " + classifier.classify(file, 2).get(0).getLeft());
+        System.out.println("Classified as: " + classifier.classify(file, 2).get(0).getLeft());
     }
 }

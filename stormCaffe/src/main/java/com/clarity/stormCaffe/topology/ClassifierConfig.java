@@ -9,16 +9,23 @@ public class ClassifierConfig {
 
     private Utils utils;
 
-    private String modelName = "/model/deploy.prototxt";
+    private String modelName;
 
     //@Value("${trainedModel}")
-    private String trainingName = "/model/iter_10000.caffemodel";
+    private String trainingName;
 
     //@Value("${meanFile}")
-    private String meanName = "/model/imagenet_mean.binaryproto";
+    private String meanName;
 
     //@Value("${labelFile}")
-    private String labelName = "/model/synsets.txt";
+    private String labelName;
+
+    public ClassifierConfig(String model,String training, String mean, String label) {
+        modelName = model;
+        trainingName = training;
+        meanName = mean;
+        labelName = label;
+    }
 
 
     public InputStream getModelFile() throws IOException {

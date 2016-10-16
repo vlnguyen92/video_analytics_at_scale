@@ -44,7 +44,7 @@ public class Classifier {
 		return currentConfig != null;
 	}
 
-	public void setUp(ClassifierConfig config) throws IOException {
+	public Classifier(ClassifierConfig config) {
 		if (config.equals(currentConfig)) {
 			return;
 		}
