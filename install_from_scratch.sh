@@ -176,48 +176,48 @@ for cudnn in ${CUDNN_INSTALLERS[@]}; do
     source ~/.bashrc
 done
 
-## Caffe
-subinfo "Intalling Caffe from git..."
-cd $BUILD_DIR
-### dependencies
-sudo apt-get install -y libprotobuf-dev libhdf5-serial-dev protobuf-compiler
-sudo apt-get install -y --no-install-recommends libboost-all-dev
-sudo apt-get install -y libgflags-dev libgoogle-glog-dev libopenblas-dev
-sudo apt-get install -y python-dev python-numpy
-### clone code and config
-git clone https://github.com/BVLC/caffe.git
-cd caffe && mkdir build && cd build
-cmake -DCMAKE_INSTALL_PREFIX=$TOOL_DIR/caffe \
-      -DUSE_LMDB=OFF \
-      -DUSE_LEVELDB=OFF \
-      -DUSE_OPENCV=OFF \
-      -DBLAS=open \
-      ..
-### build and install
-make -j$CORE_NUMBER install
-### refresh PATH and other things
-source ~/.bashrc
-
-## OpenCV
-subinfo "Intalling OpenCV from git..."
-cd $BUILD_DIR
-### dependencies
-sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
-sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
-### source code and config
-git clone https://github.com/opencv/opencv.git
-git clone https://github.com/opencv/opencv_contrib.git
-cd opencv
-mkdir build && cd build
-#### disable cudalegacy, which is incompatible with cuda 8.0
-cmake -DCMAKE_BUILD_TYPE=RELEASE \
-      -DCMAKE_INSTALL_PREFIX=$TOOL_DIR/opencv \
-      -DOPENCV_EXTRA_MODULES_PATH=$BUILD_DIR/opencv_contrib/modules \
-      ..
-### build and install
-make -j$CORE_NUMBER install
-### refresh PATH and other things
-source ~/.bashrc
+### Caffe
+#subinfo "Intalling Caffe from git..."
+#cd $BUILD_DIR
+#### dependencies
+#sudo apt-get install -y libprotobuf-dev libhdf5-serial-dev protobuf-compiler
+#sudo apt-get install -y --no-install-recommends libboost-all-dev
+#sudo apt-get install -y libgflags-dev libgoogle-glog-dev libopenblas-dev
+#sudo apt-get install -y python-dev python-numpy
+#### clone code and config
+#git clone https://github.com/BVLC/caffe.git
+#cd caffe && mkdir build && cd build
+#cmake -DCMAKE_INSTALL_PREFIX=$TOOL_DIR/caffe \
+#      -DUSE_LMDB=OFF \
+#      -DUSE_LEVELDB=OFF \
+#      -DUSE_OPENCV=OFF \
+#      -DBLAS=open \
+#      ..
+#### build and install
+#make -j$CORE_NUMBER install
+#### refresh PATH and other things
+#source ~/.bashrc
+#
+### OpenCV
+#subinfo "Intalling OpenCV from git..."
+#cd $BUILD_DIR
+#### dependencies
+#sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+#sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+#### source code and config
+#git clone https://github.com/opencv/opencv.git
+#git clone https://github.com/opencv/opencv_contrib.git
+#cd opencv
+#mkdir build && cd build
+##### disable cudalegacy, which is incompatible with cuda 8.0
+#cmake -DCMAKE_BUILD_TYPE=RELEASE \
+#      -DCMAKE_INSTALL_PREFIX=$TOOL_DIR/opencv \
+#      -DOPENCV_EXTRA_MODULES_PATH=$BUILD_DIR/opencv_contrib/modules \
+#      ..
+#### build and install
+#make -j$CORE_NUMBER install
+#### refresh PATH and other things
+#source ~/.bashrc
 
 ## Zookeeper
 subinfo "Installing Zookeeper 3.4.9"
@@ -264,55 +264,55 @@ supervisor.slots.ports:
     - 6705
 EOF
 
-## C3D Caffe
-subinfo "Installing C3D Caffe..."
-cd $BUILD_DIR
-### dependencies
-sudo apt-get install -y libleveldb-dev libsnappy-dev
-### skip normal caffe
-mv $TOOL_DIR/caffe $TOOL_DIR/caffe.skip
-source ~/.bashrc
-### clone and config
-if [ -d "$BUILD_DIR/scnn" ]; then
-    cd scnn && git pull
-    git reset --hard # removes staged and working directory changes
-    git clean -fxd :/ # remove untracked and ingored fiels through all repo
-else
-    git clone https://github.com/zhengshou/scnn.git && cd scnn
-fi
-#### overlap_loss
-cd C3D_overlap_loss
-sed -i -r 's#^(CUDA_DIR := ).*$#\1/usr/local/cuda-8.0#' Makefile.config
-sed -i -r 's#^(BLAS := ).*$#\1open#' Makefile.config
-sed -i -r 's#/usr/local/include/python2\.7#/usr/include/python2.7#' Makefile.config
-sed -i -r 's#/usr/local/lib/python2\.7#/usr/lib/python2.7#' Makefile.config
-sed -i -r 's#^(DEBUG := ).*$#\10#' Makefile.config
-sed -i -r 's#^(INCLUDE_DIRS := ).*$#\1$(PYTHON_INCLUDE) $(subst :, ,$(INCLUDE)) /usr/include/hdf5/serial#' Makefile.config
-sed -i -r 's#^(LIBRARY_DIRS := ).*$#\1$(PYTHON_LIB) $(subst :, ,$(LIB)) /usr/lib/x86_64-linux-gnu/hdf5/serial#' Makefile.config
-##### fix opencv 3 compatibility
-sed -i -r 's!opencv_core opencv_highgui opencv_imgproc!opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_videoio!' Makefile
-##### build and install
-make -j$CORE_NUMBER
-install -d $TOOL_DIR/caffe_c3d/lib
-install -m755 build/lib/libcaffe.so $TOOL_DIR/caffe_c3d/lib/libc3d_overlap_loss.so
-#### sample_rate
-cd ../C3D_sample_rate
-sed -i -r 's#^(CUDA_DIR := ).*$#\1/usr/local/cuda-8.0#' Makefile.config
-sed -i -r 's#^(BLAS := ).*$#\1open#' Makefile.config
-sed -i -r 's#/usr/local/include/python2\.7#/usr/include/python2.7#' Makefile.config
-sed -i -r 's#/usr/local/lib/python2\.7#/usr/lib/python2.7#' Makefile.config
-sed -i -r 's#^(DEBUG := ).*$#\10#' Makefile.config
-sed -i -r 's#^(INCLUDE_DIRS := ).*$#\1$(PYTHON_INCLUDE) $(subst :, ,$(INCLUDE)) /usr/include/hdf5/serial#' Makefile.config
-sed -i -r 's#^(LIBRARY_DIRS := ).*$#\1$(PYTHON_LIB) $(subst :, ,$(LIB)) /usr/lib/x86_64-linux-gnu/hdf5/serial#' Makefile.config
-##### fix opencv 3 compatibility
-sed -i -r 's!opencv_core opencv_highgui opencv_imgproc!opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_videoio!' Makefile
-##### build and install
-make -j$CORE_NUMBER
-install -d $TOOL_DIR/caffe_c3d/lib
-install -m755 build/lib/libcaffe.so $TOOL_DIR/caffe_c3d/lib/libc3d_sample_rate.so
-### restore normal caffe
-mv $TOOL_DIR/caffe.skip $TOOL_DIR/caffe
-source ~/.bashrc
+### C3D Caffe
+#subinfo "Installing C3D Caffe..."
+#cd $BUILD_DIR
+#### dependencies
+#sudo apt-get install -y libleveldb-dev libsnappy-dev
+#### skip normal caffe
+#mv $TOOL_DIR/caffe $TOOL_DIR/caffe.skip
+#source ~/.bashrc
+#### clone and config
+#if [ -d "$BUILD_DIR/scnn" ]; then
+#    cd scnn && git pull
+#    git reset --hard # removes staged and working directory changes
+#    git clean -fxd :/ # remove untracked and ingored fiels through all repo
+#else
+#    git clone https://github.com/zhengshou/scnn.git && cd scnn
+#fi
+##### overlap_loss
+#cd C3D_overlap_loss
+#sed -i -r 's#^(CUDA_DIR := ).*$#\1/usr/local/cuda-8.0#' Makefile.config
+#sed -i -r 's#^(BLAS := ).*$#\1open#' Makefile.config
+#sed -i -r 's#/usr/local/include/python2\.7#/usr/include/python2.7#' Makefile.config
+#sed -i -r 's#/usr/local/lib/python2\.7#/usr/lib/python2.7#' Makefile.config
+#sed -i -r 's#^(DEBUG := ).*$#\10#' Makefile.config
+#sed -i -r 's#^(INCLUDE_DIRS := ).*$#\1$(PYTHON_INCLUDE) $(subst :, ,$(INCLUDE)) /usr/include/hdf5/serial#' Makefile.config
+#sed -i -r 's#^(LIBRARY_DIRS := ).*$#\1$(PYTHON_LIB) $(subst :, ,$(LIB)) /usr/lib/x86_64-linux-gnu/hdf5/serial#' Makefile.config
+###### fix opencv 3 compatibility
+#sed -i -r 's!opencv_core opencv_highgui opencv_imgproc!opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_videoio!' Makefile
+###### build and install
+#make -j$CORE_NUMBER
+#install -d $TOOL_DIR/caffe_c3d/lib
+#install -m755 build/lib/libcaffe.so $TOOL_DIR/caffe_c3d/lib/libc3d_overlap_loss.so
+##### sample_rate
+#cd ../C3D_sample_rate
+#sed -i -r 's#^(CUDA_DIR := ).*$#\1/usr/local/cuda-8.0#' Makefile.config
+#sed -i -r 's#^(BLAS := ).*$#\1open#' Makefile.config
+#sed -i -r 's#/usr/local/include/python2\.7#/usr/include/python2.7#' Makefile.config
+#sed -i -r 's#/usr/local/lib/python2\.7#/usr/lib/python2.7#' Makefile.config
+#sed -i -r 's#^(DEBUG := ).*$#\10#' Makefile.config
+#sed -i -r 's#^(INCLUDE_DIRS := ).*$#\1$(PYTHON_INCLUDE) $(subst :, ,$(INCLUDE)) /usr/include/hdf5/serial#' Makefile.config
+#sed -i -r 's#^(LIBRARY_DIRS := ).*$#\1$(PYTHON_LIB) $(subst :, ,$(LIB)) /usr/lib/x86_64-linux-gnu/hdf5/serial#' Makefile.config
+###### fix opencv 3 compatibility
+#sed -i -r 's!opencv_core opencv_highgui opencv_imgproc!opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_videoio!' Makefile
+###### build and install
+#make -j$CORE_NUMBER
+#install -d $TOOL_DIR/caffe_c3d/lib
+#install -m755 build/lib/libcaffe.so $TOOL_DIR/caffe_c3d/lib/libc3d_sample_rate.so
+#### restore normal caffe
+#mv $TOOL_DIR/caffe.skip $TOOL_DIR/caffe
+#source ~/.bashrc
 
 ## Our project
 cd $HOME
@@ -322,3 +322,29 @@ else
     git clone https://github.com/vlnguyen92/video_analytics_at_scale.git
 fi
 
+## Javacpp
+info "Building Javacpp"
+cd $BUILD_DIR
+git clone https://github.com/bytedeco/javacpp.git
+cd javacpp
+mvn install
+
+## Javacpp presets
+info "Building Javacpp-presets"
+### dependencies
+sudo apt-get install -y docker.io
+sudo systemctl start docker
+### source code
+cd $BUILD_DIR
+git clone https://github.com/Aetf/javacpp-presets.git
+### install
+sudo docker run -i --privileged -v /home/cc/buildbed:/usr/local/buildbed -v /usr/local/cuda-8.0:/usr/local/cuda -v /home/cc/.m2:/root/.m2 centos:7 /bin/bash <<EOF
+yum -y install epel-release
+yum -y install clang gcc-c++ gcc-gfortran java-devel maven python numpy swig git file which wget unzip tar bzip2 gzip xz patch make cmake perl nasm yasm atlas-devel openblas-devel freeglut-devel gtk2-devel libusb-devel libusb1-devel zlib-devel
+yum install \`rpm -qa | sed s/.x86_64$/.i686/\`
+cd /usr/local/buildbed/javacpp-presets
+mvn clean install -Djavacpp.platform=linux-x86_64 -Djavacpp.platform.dependency=false --projects .,opencv,ffmpeg,caffe,caffeC3DOverlapLoss,caffeC3DSampleRate
+EOF
+### Fix permisssions
+sudo chown -R cc:cc /home/cc/.m2
+sudo chown -R cc:cc /home/cc/buildbed
