@@ -16,12 +16,13 @@ public class VisionTopology
     {
         TopologyBuilder builder = new TopologyBuilder();
 
+//        String file = "/home/lvnguyen/video_analytics_at_scale/stormCaffe/resources/ILSVRC2012.mp4";
         String file = "/home/lvnguyen/video_data/testvid.mp4";
         builder.setSpout("spout", new FrameGetterSpout(file), 1);
 
         builder.setBolt("get-dimension", new FrameProcessorBolt(), 1).shuffleGrouping("spout");
 
-//        builder.setBolt("add", new AddBolt(), 1).shuffleGrouping("get-dimension");
+        builder.setBolt("add", new AddBolt(), 1).shuffleGrouping("get-dimension");
 
         Config conf = new Config();
         conf.setDebug(true);

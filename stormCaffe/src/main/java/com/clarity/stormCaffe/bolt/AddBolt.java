@@ -19,9 +19,10 @@ public class AddBolt extends BaseRichBolt{
     OutputCollector collector;
 
     @Override 
-    public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
+    public void prepare(Map map, TopologyContext topologyContext, OutputCollector collector) {
         this.collector = collector;
     }
+
     @Override
     public void execute(Tuple tuple) {
         Integer height = tuple.getIntegerByField("height");
