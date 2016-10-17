@@ -32,13 +32,13 @@ public class FrameProcessorBolt extends BaseRichBolt{
         int W = smat.getCols();
         int H = smat.getRows();
 
-//        collector.emit(tuple, new Values(H,W));
+        collector.emit(tuple, new Values(H,W));
         collector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields());
-//        declarer.declare(new Fields("height","width"));
+//        declarer.declare(new Fields());
+        declarer.declare(new Fields("height","width"));
     }
 }
