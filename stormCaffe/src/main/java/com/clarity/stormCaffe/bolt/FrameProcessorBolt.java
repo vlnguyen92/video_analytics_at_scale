@@ -1,16 +1,13 @@
 package com.clarity.stormCaffe.bolt;
 
-import org.apache.storm.topology.base.BaseRichBolt;
-import org.apache.storm.task.TopologyContext;
+import com.clarity.stormCaffe.model.Frame;
 import org.apache.storm.task.OutputCollector;
-import org.apache.storm.utils.Utils;
+import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
-import org.apache.storm.tuple.Values;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.utils.Utils;
-
-import com.clarity.stormCaffe.util.Serializable;
+import org.bytedeco.javacpp.opencv_core;
 
 import java.util.Map;
 
@@ -24,13 +21,13 @@ public class FrameProcessorBolt extends BaseRichBolt{
     }
     @Override
     public void execute(Tuple tuple) {
-        Serializable.CVMat smat = (Serializable.CVMat) tuple.getValueByField("raw-frame");
+        opencv_core.Mat smat = ((Frame) tuple.getValueByField("raw-frame")).getImage();
         if(smat == null) {
             System.out.println("NULLPOINTER");
         }
 
-        int W = smat.getCols();
-        int H = smat.getRows();
+        int W = smat.cols();
+        int H = smat.rows();
 
 //        collector.emit(tuple, new Values(H,W));
         collector.ack(tuple);

@@ -205,8 +205,11 @@ public class Serializable {
         /**
          * @return Converts this Serializable CVMat into JavaCV's CVMat
          */
+        opencv_core.Mat cachedMat = null;
         public opencv_core.Mat toJavaCVMat() {
-            return new opencv_core.Mat(rows, cols, type, new BytePointer(data));
+            if (cachedMat == null)
+                cachedMat = new opencv_core.Mat(rows, cols, type, new BytePointer(data));
+            return cachedMat;
         }
 
         @Override

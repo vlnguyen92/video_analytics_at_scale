@@ -1,5 +1,6 @@
 package com.clarity.stormCaffe.spout;
 
+import com.clarity.stormCaffe.model.Frame;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -12,10 +13,6 @@ import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.KeyPoint;
 import org.bytedeco.javacpp.opencv_features2d;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.FrameGrabber.Exception;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import com.clarity.stormCaffe.util.Serializable;
 
 import java.util.Map;
@@ -57,8 +54,8 @@ public class FrameGetterSpout extends BaseRichSpout {
             OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
             mat = converter.convert(grabber.grabImage());
             if (mat != null) {
-                Serializable.CVMat sMat = new Serializable.CVMat(mat);
-                _collector.emit(new Values(sMat));
+                Frame frame = new Frame(mat);
+                _collector.emit(new Values(frame));
             }
             //            mat = new Mat(image);
 
