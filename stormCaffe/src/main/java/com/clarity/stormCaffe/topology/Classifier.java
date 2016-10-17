@@ -170,7 +170,7 @@ public class Classifier {
         mean_ = new Mat(input_geometry_, tmpMean.type(), channel_mean);
     }
 
-    private List<Prediction> classify(Mat matImage, int amount) {
+    public List<Prediction> classify(Mat matImage, int amount) {
         List<Float> output = predict(matImage);
         if(output.size() != labels_.size()) {
             System.out.println("Expected a probability for every class");
@@ -186,11 +186,11 @@ public class Classifier {
             .collect(Collectors.toList());
     }
 
-    public List<Prediction> classify(File image, int amount) throws IOException {
-        Mat matImage = imread(image.getAbsolutePath(), -1);
-        return classify(matImage, amount);
-    }
-
+    //    public List<Prediction> classify(File image, int amount) throws IOException {
+    //        Mat matImage = imread(image.getAbsolutePath(), -1);
+    //        return classify(matImage, amount);
+    //    }
+    //
     public List<Prediction> classify(String fname, int amount) throws IOException {
         Mat matImage = imread(fname, -1);
         return classify(matImage, amount);

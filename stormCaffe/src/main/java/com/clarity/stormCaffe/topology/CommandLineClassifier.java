@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 
+import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
+import static org.bytedeco.javacpp.opencv_core.Mat;
+
 public class CommandLineClassifier {
 
     public static void main(String[] args) throws Exception {
@@ -18,6 +21,7 @@ public class CommandLineClassifier {
         Classifier classifier= new Classifier(modelFile,trainFile,meanFile,labelFile);
 
         String file = args[0];
+//        Mat img = imread(file,-1);
         System.out.println(file);
         System.out.println("Classified as: " + classifier.classify(file, 2).get(0).getLeft());
     }
