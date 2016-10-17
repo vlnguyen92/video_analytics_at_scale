@@ -19,14 +19,21 @@ import java.util.Map;
 public class FrameProcessorBolt extends BaseRichBolt{
 
     OutputCollector collector;
-    Classifier classifier;
-
-    public FrameProcessorBolt(Classifier classifier) {
-        this.classifier = classifier;
-    }
+    Classifier classifier = null;
 
     @Override 
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector collector) {
+        String rootDir = "/home/cc/video_analytics_at_scale/stormCaffe/";
+        String modelFile = rootDir + "resources/model/deploy.prototxt";
+        String trainFile = rootDir + "resources/model/bvlc_googlenet.caffemodel";
+        String meanFile = rootDir + "resources/model/imagenet_mean.binaryproto";
+        String labelFile = rootDir + "resources/model/synset_words.txt";
+	try{
+        classifier = new Classifier(modelFile,trainFile,meanFile,labelFile);
+	}catch (java.io.IOException e) {
+	e.printStackTrace();
+	}
+
         this.collector = collector;
     }
 

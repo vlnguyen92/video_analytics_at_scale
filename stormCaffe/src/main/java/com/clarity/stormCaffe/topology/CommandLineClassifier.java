@@ -13,7 +13,7 @@ import static org.bytedeco.javacpp.opencv_core.Mat;
 public class CommandLineClassifier {
 
     public static void main(String[] args) throws Exception {
-        String rootDir = "/home/lvnguyen/stormSchedulers/video_analytics_at_scale/stormCaffe/";
+        String rootDir = "/home/cc/video_analytics_at_scale/stormCaffe/";
         String modelFile = rootDir + "resources/model/deploy.prototxt";
         String trainFile = rootDir + "resources/model/bvlc_googlenet.caffemodel";
         String meanFile = rootDir + "resources/model/imagenet_mean.binaryproto";
@@ -23,6 +23,6 @@ public class CommandLineClassifier {
         String file = args[0];
 //        Mat img = imread(file,-1);
         System.out.println(file);
-        System.out.println("Classified as: " + classifier.classify(file, 2).get(0).getLeft());
+//        System.out.println("Classified as: " + classifier.classify(file, 2).get(0).getLeft());
     }
 }
