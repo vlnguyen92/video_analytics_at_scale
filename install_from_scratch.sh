@@ -6,9 +6,10 @@ TOOL_DIR=~/tools
 
 CORE_NUMBER=$(grep -c ^processor /proc/cpuinfo)
 
-CUDA_REPO_DEB="https://developer.nvidia.com/compute/cuda/8.0/prod/local_installers/cuda-repo-ubuntu1604-8-0-local_8.0.44-1_amd64-deb"
+CUDA_REPO_DEB="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda-repo-ubuntu1504-7-5-local_7.5-18_amd64.deb"
 CUDNN_INSTALLERS=(
-    cudnn-8.0-linux-x64-v5.1.tgz
+    #cudnn-8.0-linux-x64-v5.1.tgz
+    cudnn-7.5-linux-x64-v5.1.tgz
 #    cudnn-7.0-linux-x64-v4.0-prod.tgz
 #    cudnn-7.0-linux-x64-v3.0.8-prod.tgz
 )
@@ -104,8 +105,8 @@ source "$DOWNLOAD_DIR/CH-818207-openrc.sh"
 
 info "Download files from object store"
 cd $DOWNLOAD_DIR
-swift download storm_files cuda-repo-ubuntu1604-8-0-local_8.0.44-1_amd64-deb
-swift download storm_files cudnn-8.0-linux-x64-v5.1.tgz
+swift download storm_files cuda_7.5.18_linux.run
+swift download storm_files cudnn-7.5-linux-x64-v5.1.tgz
 
 # Install nvidia driver and cuda
 info "Installing nvidia driver and cuda library"
@@ -113,9 +114,16 @@ sudo add-apt-repository -y ppa:graphics-drivers/ppa
 sudo apt-get update && sudo apt-get dist-upgrade -y
 sudo apt-get install -y linux-headers-generic
 
-download $CUDA_REPO_DEB
-sudo dpkg -i $DOWNLOAD_DIR/cuda-repo-ubuntu1604-8-0-local_8.0.44-1_amd64-deb
-sudo apt-get update && sudo apt-get install -y cuda
+#download $CUDA_REPO_DEB
+#sudo dpkg -i $DOWNLOAD_DIR/cuda-repo-ubuntu1504-7-5-local_7.5-18_amd64.deb
+#sudo apt-get update && sudo apt-get install -y cuda
+download http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda_7.5.18_linux.run
+sudo bash $DOWNLOAD_DIR/cuda_7.5.18_linux.run --slient --toolkit
+echo << EOF
+/usr/local/cuda-7.5/lib64
+EOF
+| sudo tee /etc/ld.so.conf.d/cuda.conf
+sudo ldconfig
 
 # Install other build tools
 info "Installing other build tools"
@@ -282,7 +290,7 @@ EOF
 #fi
 ##### overlap_loss
 #cd C3D_overlap_loss
-#sed -i -r 's#^(CUDA_DIR := ).*$#\1/usr/local/cuda-8.0#' Makefile.config
+#sed -i -r 's#^(CUDA_DIR := ).*$#\1/usr/local/cuda#' Makefile.config
 #sed -i -r 's#^(BLAS := ).*$#\1open#' Makefile.config
 #sed -i -r 's#/usr/local/include/python2\.7#/usr/include/python2.7#' Makefile.config
 #sed -i -r 's#/usr/local/lib/python2\.7#/usr/lib/python2.7#' Makefile.config
@@ -297,7 +305,7 @@ EOF
 #install -m755 build/lib/libcaffe.so $TOOL_DIR/caffe_c3d/lib/libc3d_overlap_loss.so
 ##### sample_rate
 #cd ../C3D_sample_rate
-#sed -i -r 's#^(CUDA_DIR := ).*$#\1/usr/local/cuda-8.0#' Makefile.config
+#sed -i -r 's#^(CUDA_DIR := ).*$#\1/usr/local/cuda#' Makefile.config
 #sed -i -r 's#^(BLAS := ).*$#\1open#' Makefile.config
 #sed -i -r 's#/usr/local/include/python2\.7#/usr/include/python2.7#' Makefile.config
 #sed -i -r 's#/usr/local/lib/python2\.7#/usr/lib/python2.7#' Makefile.config
@@ -338,7 +346,7 @@ sudo systemctl start docker
 cd $BUILD_DIR
 git clone https://github.com/Aetf/javacpp-presets.git
 ### install
-sudo docker run -i --privileged -v /home/cc/buildbed:/usr/local/buildbed -v /usr/local/cuda-8.0:/usr/local/cuda -v /home/cc/.m2:/root/.m2 centos:7 /bin/bash <<EOF
+sudo docker run -i --privileged -v /home/cc/buildbed:/usr/local/buildbed -v /usr/local/cuda:/usr/local/cuda -v /home/cc/.m2:/root/.m2 centos:7 /bin/bash <<EOF
 yum -y install epel-release
 yum -y install clang gcc-c++ gcc-gfortran java-devel maven python numpy swig git file which wget unzip tar bzip2 gzip xz patch make cmake perl nasm yasm atlas-devel openblas-devel freeglut-devel gtk2-devel libusb-devel libusb1-devel zlib-devel
 yum install \`rpm -qa | sed s/.x86_64$/.i686/\`
