@@ -33,7 +33,7 @@ public class Classifier {
 
     public Classifier(String model,String training, String mean, String label) throws IOException {
         //this is where you set mode
-        Caffe.set_mode(Caffe.CPU);
+        Caffe.set_mode(Caffe.GPU);
         net_ = new FloatNet(model, caffe.TEST);
         net_.CopyTrainedLayersFrom(training);
         if(net_.num_inputs() != 1) {
