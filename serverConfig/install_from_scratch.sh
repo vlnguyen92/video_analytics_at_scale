@@ -124,6 +124,7 @@ info "Installing nvidia driver and cuda library"
 sudo add-apt-repository -y ppa:graphics-drivers/ppa
 sudo apt-get update && sudo apt-get dist-upgrade -y
 sudo apt-get install -y linux-headers-generic
+sudo apt-get install -y nvidia-370
 
 #download $CUDA_REPO_DEB
 #sudo dpkg -i $DOWNLOAD_DIR/cuda-repo-ubuntu1504-7-5-local_7.5-18_amd64.deb
