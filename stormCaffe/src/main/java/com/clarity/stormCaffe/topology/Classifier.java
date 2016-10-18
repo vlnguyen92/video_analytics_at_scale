@@ -1,26 +1,30 @@
 package com.clarity.stormCaffe.topology;
 
+import com.clarity.stormCaffe.util.Utils;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.caffe;
+import org.bytedeco.javacpp.caffe.BlobProto;
+import org.bytedeco.javacpp.caffe.Caffe;
+import org.bytedeco.javacpp.caffe.FloatBlob;
+import org.bytedeco.javacpp.caffe.FloatNet;
+import org.bytedeco.javacpp.indexer.FloatRawIndexer;
+import org.bytedeco.javacpp.opencv_core;
+import org.bytedeco.javacpp.opencv_core.*;
+import org.bytedeco.javacpp.opencv_imgproc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
-
-import com.ae.caffeserver.util.Utils;
-import org.bytedeco.javacpp.*;
-import org.bytedeco.javacpp.indexer.FloatRawIndexer;
-import org.bytedeco.javacpp.opencv_core.*;
-import org.bytedeco.javacpp.caffe.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
-import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
