@@ -24,6 +24,12 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
+# Set magic variables for current file & dir
+__dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+__file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
+__base="$(basename ${__file} .sh)"
+
+
 ## Helper functions
 download() {
     if [ "$#" -eq 2 ]; then
@@ -95,9 +101,14 @@ prompt() {
 
 info "Script initialization done"
 
+# Fix configuration
+info "Fixing system configuration"
+echo "127.0.0.1 $(hostname)" | sudo tee -a /etc/hosts
+sudo cp "$__dir"/cloud.cfg /etc/cloud/cloud.cfg
+
 # Generic system update
 info "Updating system"
-sudo apt-get update && sudo apt-get dist-upgrade -y
+sudo apt-get update && sudo apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade -y
 
 # Setup Chameleon Object Store
 info "Authenticating against Chameleon"
@@ -118,16 +129,13 @@ sudo apt-get install -y linux-headers-generic
 #sudo dpkg -i $DOWNLOAD_DIR/cuda-repo-ubuntu1504-7-5-local_7.5-18_amd64.deb
 #sudo apt-get update && sudo apt-get install -y cuda
 download http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda_7.5.18_linux.run
-sudo bash $DOWNLOAD_DIR/cuda_7.5.18_linux.run --slient --toolkit
-echo << EOF
-/usr/local/cuda-7.5/lib64
-EOF
-| sudo tee /etc/ld.so.conf.d/cuda.conf
+sudo bash $DOWNLOAD_DIR/cuda_7.5.18_linux.run --silent --toolkit --override
+echo '/usr/local/cuda-7.5/lib64' | sudo tee /etc/ld.so.conf.d/cuda.conf
 sudo ldconfig
 
 # Install other build tools
 info "Installing other build tools"
-sudo apt-get install -y build-essential cmake maven git gnome-terminal ffmpeg
+sudo apt-get install -y build-essential cmake maven git gnome-terminal ffmpeg vim
 
 # Setup bash shell
 info "Setting up bash shell"
@@ -329,6 +337,11 @@ if [ -d video_analytics_at_scale ]; then
 else
     git clone https://github.com/vlnguyen92/video_analytics_at_scale.git
 fi
+
+if ! prompt "Basic setup done, proceed to javacpp compilation?"; then
+    exit
+fi
+
 
 ## Javacpp
 info "Building Javacpp"
