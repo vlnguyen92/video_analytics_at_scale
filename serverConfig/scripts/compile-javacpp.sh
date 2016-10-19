@@ -8,6 +8,8 @@ __base="$(basename ${__file} .sh)"
 source "$__dir/helpers.sh"
 
 CORE_NUMBER=$(grep -c ^processor /proc/cpuinfo)
+PLATFORM="$1"
+PROJECTS="$2"
 
 ## Javacpp presets
 info "Building Javacpp-presets"
@@ -23,7 +25,7 @@ yum -y install epel-release
 yum -y install clang gcc-c++ gcc-gfortran java-devel maven python numpy swig git file which wget unzip tar bzip2 gzip xz patch make cmake perl nasm yasm atlas-devel openblas-devel freeglut-devel gtk2-devel libusb-devel libusb1-devel zlib-devel
 yum -y install \`rpm -qa | sed s/.x86_64$/.i686/\`
 cd /usr/local/buildbed/javacpp-presets
-mvn clean install -Djavacpp.platform=linux-x86_64 -Djavacpp.platform.dependency=false --projects .,opencv,ffmpeg,caffe,caffeC3DOverlapLoss,caffeC3DSampleRate
+mvn clean install -Djavacpp.platform=$PLATFORM -Djavacpp.platform.dependency=false --projects .,$PROJECTS
 EOF
 ### Fix permisssions
 sudo chown -R cc:cc /home/cc/.m2

@@ -71,3 +71,7 @@ prompt() {
         esac
     done
 }
+
+function join_by {
+    local IFS="$1"; shift; echo "$*";
+}

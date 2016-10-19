@@ -267,5 +267,5 @@ else
 fi
 
 if prompt "Basic setup done, proceed to javacpp compilation?"; then
-    scripts/compile-javacpp.sh
+    scripts/compile-javacpp.sh linux-x86_64 "opencv,ffmpeg,caffe,caffeC3DSampleRate,caffeC3DOverlapLoss"
 fi
