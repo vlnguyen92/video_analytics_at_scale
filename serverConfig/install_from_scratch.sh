@@ -19,85 +19,12 @@ CUDNN_INSTALLERS=(
 #
 # Script initialization
 #
-
-set -o nounset
-set -o errexit
-set -o pipefail
-
 # Set magic variables for current file & dir
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
 
-
-## Helper functions
-download() {
-    if [ "$#" -eq 2 ]; then
-        if [ -f "$2/$1" ]; then
-            return
-        fi
-        cd "$2" && { curl -OJL "$1" ; cd -; }
-    elif [ "$#" -eq 1 ]; then
-        mkdir -p $DOWNLOAD_DIR
-        download "$1" $DOWNLOAD_DIR
-    else
-        error "Invalid argument to download"
-        exit 1
-    fi
-}
-
-info() {
-    local bold=$(tput bold)
-    local green=$(tput setaf 2)
-    local reset=$(tput sgr0)
-    echo -en "${green}${bold}==> ${reset}"
-    echo -e "${bold}$@${reset}"
-}
-
-subinfo() {
-    local bold=$(tput bold)
-    local green=$(tput setaf 2)
-    local reset=$(tput sgr0)
-    echo -en "${green}${bold}====> ${reset}"
-    echo -e "${bold}$@${reset}"
-}
-
-error() {
-    local bold=$(tput bold)
-    local red=$(tput setaf 1)
-    local reset=$(tput sgr0)
-    echo -en "${red}${bold}==> ${reset}"
-    echo >&2 -e "${bold}$@${reset}"
-    exit 1
-}
-
-prompt() {
-    local bold=$(tput bold)
-    local yellow=$(tput setaf 1)
-    local reset=$(tput sgr0)
-    local waitingforanswer=true
-    while ${waitingforanswer}; do
-        echo -en "${yellow}${bold}==> ${reset}"
-        echo >&2 -e "${bold}$@${reset}"
-        read -n 1 ynanswer
-        case ${ynanswer} in 
-            [Yy] )
-                waitingforanswer=false;
-                echo ""
-                return 0
-                ;;
-            [Nn] )
-                echo "";
-                info "Opeartion cancelled by user"
-                return 1
-                ;;
-            *    )
-                echo ""; 
-                echo -en "${yellow}${bold}==> ${reset}"
-                echo >&2 -e "${bold}Please answer either yes (y/Y) or no (n/N).${reset}";;
-        esac
-    done
-}
+source "$__dir/scripts/helpers.sh"
 
 info "Script initialization done"
 
@@ -263,7 +190,7 @@ java.library.path: "$JAVA_HOME:$LD_LIBRARY_PATH"
 storm.zookeeper.port: 2181
 storm.zookeeper.servers:
     - "$(hostname)"
-    
+
 nimbus.seeds:
     - "$(hostname)"
 nimbus.thrift.port: 6627
@@ -339,34 +266,6 @@ else
     git clone https://github.com/vlnguyen92/video_analytics_at_scale.git
 fi
 
-if ! prompt "Basic setup done, proceed to javacpp compilation?"; then
-    exit
+if prompt "Basic setup done, proceed to javacpp compilation?"; then
+    scripts/compile-javacpp.sh
 fi
-
-
-## Javacpp
-info "Building Javacpp"
-cd $BUILD_DIR
-git clone https://github.com/bytedeco/javacpp.git
-cd javacpp
-mvn install
-
-## Javacpp presets
-info "Building Javacpp-presets"
-### dependencies
-sudo apt-get install -y docker.io
-sudo systemctl start docker
-### source code
-cd $BUILD_DIR
-git clone https://github.com/Aetf/javacpp-presets.git
-### install
-sudo docker run -i --privileged -v /home/cc/buildbed:/usr/local/buildbed -v /usr/local/cuda:/usr/local/cuda -v /home/cc/.m2:/root/.m2 centos:7 /bin/bash <<EOF
-yum -y install epel-release
-yum -y install clang gcc-c++ gcc-gfortran java-devel maven python numpy swig git file which wget unzip tar bzip2 gzip xz patch make cmake perl nasm yasm atlas-devel openblas-devel freeglut-devel gtk2-devel libusb-devel libusb1-devel zlib-devel
-yum install \`rpm -qa | sed s/.x86_64$/.i686/\`
-cd /usr/local/buildbed/javacpp-presets
-mvn clean install -Djavacpp.platform=linux-x86_64 -Djavacpp.platform.dependency=false --projects .,opencv,ffmpeg,caffe,caffeC3DOverlapLoss,caffeC3DSampleRate
-EOF
-### Fix permisssions
-sudo chown -R cc:cc /home/cc/.m2
-sudo chown -R cc:cc /home/cc/buildbed
