@@ -33,7 +33,7 @@ public class Classifier {
 
     public Classifier(String model,String training, String mean, String label) throws IOException {
         //this is where you set mode
-        Caffe.set_mode(Caffe.GPU);
+        Caffe.set_mode(Caffe.CPU);
         net_ = new FloatNet(model, caffe.TEST);
         net_.CopyTrainedLayersFrom(training);
         if(net_.num_inputs() != 1) {
@@ -121,7 +121,7 @@ public class Classifier {
 
         preprocess(img);
 
-        net_.Forward();
+        net_.ForwardPrefilled();
         FloatBlob output_layer = net_.output_blobs().get(0);
         FloatPointer begin = output_layer.cpu_data();
         List<Float> rvalue = new ArrayList<>();
