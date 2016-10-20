@@ -8,12 +8,6 @@ GPU_AVAILABLE=$(lsmod | grep nouveau)
 
 #CUDA_REPO_DEB="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda-repo-ubuntu1504-7-5-local_7.5-18_amd64.deb"
 CUDA_REPO_DEB="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda-repo-ubuntu1404-7-5-local_7.5-18_amd64.deb"
-CUDNN_INSTALLERS=(
-    #cudnn-8.0-linux-x64-v5.1.tgz
-    cudnn-7.5-linux-x64-v5.1.tgz
-#    cudnn-7.0-linux-x64-v4.0-prod.tgz
-#    cudnn-7.0-linux-x64-v3.0.8-prod.tgz
-)
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
@@ -57,7 +51,8 @@ if [ "${GPU_AVAILABLE}x" != "x" ]; then
     sudo add-apt-repository -y ppa:graphics-drivers/ppa
     sudo apt-get update && sudo apt-get dist-upgrade -y
     sudo apt-get install -y linux-headers-generic ubuntu-drivers-common
-    sudo ubuntu-drivers autoinstall
+    # seems not necessary as cuda will pull in driver automatically
+    #sudo ubuntu-drivers autoinstall
 
     download $CUDA_REPO_DEB
     sudo dpkg -i $DOWNLOAD_DIR/cuda-repo-ubuntu1404-7-5-local_7.5-18_amd64.deb
@@ -72,7 +67,7 @@ fi
 info "Installing other build tools"
 sudo apt-get install -y build-essential cmake maven git gnome-terminal vim
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-sudo add-apt-repository ppa:mc3man/trusty-media && sudo apt-get update
+sudo add-apt-repository -y ppa:mc3man/trusty-media && sudo apt-get update
 sudo apt-get install -y ffmpeg
 
 
@@ -86,11 +81,11 @@ done
 source ~/.bashrc
 
 # Python related
-info "Setting up python"
-sudo apt-get install -y virtualenv
-virtualenv -p python2 --system-site-packages ~/venvs/stormgpu
-~/venvs/stormgpu/bin/pip install Cython
-~/venvs/stormgpu/bin/pip install scipy
+#info "Setting up python"
+#sudo apt-get install -y virtualenv
+#virtualenv -p python2 --system-site-packages ~/venvs/stormgpu
+#~/venvs/stormgpu/bin/pip install Cython
+#~/venvs/stormgpu/bin/pip install scipy
 
 # Java related
 info "Setting up java"
@@ -98,7 +93,7 @@ sudo add-apt-repository -y ppa:webupd8team/java
 sudo apt-get update
 echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
 echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
-sudo apt-get install -y oracle-java8-installer
+sudo apt-get install -y oracle-java8-installer oracle-java8-set-default
 
 # Install third party tools
 info "Installing third party tools"

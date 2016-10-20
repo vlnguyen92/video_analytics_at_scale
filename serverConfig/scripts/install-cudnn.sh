@@ -7,6 +7,14 @@ __base="$(basename ${__file} .sh)"
 
 source "$__dir/helpers.sh"
 
+CUDNN_INSTALLERS=(
+    #cudnn-8.0-linux-x64-v5.1.tgz
+    cudnn-7.5-linux-x64-v5.1.tgz
+#    cudnn-7.0-linux-x64-v4.0-prod.tgz
+#    cudnn-7.0-linux-x64-v3.0.8-prod.tgz
+)
+
+
 ## cuDNN
 subinfo "Intalling cuDNN..."
 for cudnn in ${CUDNN_INSTALLERS[@]}; do
