@@ -3,6 +3,8 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
+CORE_NUMBER=$(grep -c ^processor /proc/cpuinfo)
+
 ## Helper functions
 download() {
     if [ "$#" -eq 2 ]; then

@@ -7,9 +7,18 @@ __base="$(basename ${__file} .sh)"
 
 source "$__dir/helpers.sh"
 
-CORE_NUMBER=$(grep -c ^processor /proc/cpuinfo)
 PLATFORM="$1"
 PROJECTS="$2"
+
+## Javacpp
+info "Building Javacpp"
+cd $BUILD_DIR
+if [ -d javacpp ]; then
+    cd javacpp && git pull
+else
+    git clone https://github.com/bytedeco/javacpp.git && cd javacpp
+fi
+mvn install
 
 ## Javacpp presets
 info "Building Javacpp-presets"
@@ -18,7 +27,11 @@ sudo apt-get update && sudo apt-get install -y docker.io
 sudo systemctl start docker
 ### source code
 cd $BUILD_DIR
-git clone https://github.com/Aetf/javacpp-presets.git
+if [ -d javacpp-presets ]; then
+    cd javacpp-presets && git pull
+else
+    git clone https://github.com/Aetf/javacpp-presets.git && cd javacpp-presets
+fi
 ### install
 sudo docker run -i --privileged -v /home/cc/buildbed:/usr/local/buildbed -v /usr/local/cuda:/usr/local/cuda -v /home/cc/.m2:/root/.m2 centos:7 /bin/bash <<EOF
 yum -y install epel-release
