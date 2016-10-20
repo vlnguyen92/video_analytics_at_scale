@@ -6,7 +6,8 @@ TOOL_DIR=~/tools
 
 GPU_AVAILABLE=$(lsmod | grep nouveau)
 
-CUDA_REPO_DEB="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda-repo-ubuntu1504-7-5-local_7.5-18_amd64.deb"
+#CUDA_REPO_DEB="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda-repo-ubuntu1504-7-5-local_7.5-18_amd64.deb"
+CUDA_REPO_DEB="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda-repo-ubuntu1404-7-5-local_7.5-18_amd64.deb"
 CUDNN_INSTALLERS=(
     #cudnn-8.0-linux-x64-v5.1.tgz
     cudnn-7.5-linux-x64-v5.1.tgz
@@ -55,21 +56,22 @@ if [ "${GPU_AVAILABLE}x" != "x" ]; then
     info "Installing nvidia driver and cuda library"
     sudo add-apt-repository -y ppa:graphics-drivers/ppa
     sudo apt-get update && sudo apt-get dist-upgrade -y
-    sudo apt-get install -y linux-headers-generic
-    sudo apt-get install -y nvidia-370
+    sudo apt-get install -y linux-headers-generic ubuntu-drivers-common
+    sudo ubuntu-drivers autoinstall
 
-    #download $CUDA_REPO_DEB
-    #sudo dpkg -i $DOWNLOAD_DIR/cuda-repo-ubuntu1504-7-5-local_7.5-18_amd64.deb
-    #sudo apt-get update && sudo apt-get install -y cuda
-    download http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda_7.5.18_linux.run
-    sudo bash $DOWNLOAD_DIR/cuda_7.5.18_linux.run --silent --toolkit --override
-    echo '/usr/local/cuda-7.5/lib64' | sudo tee /etc/ld.so.conf.d/cuda.conf
-    sudo ldconfig
+    download $CUDA_REPO_DEB
+    sudo dpkg -i $DOWNLOAD_DIR/cuda-repo-ubuntu1404-7-5-local_7.5-18_amd64.deb
+    sudo apt-get update && sudo apt-get install -y cuda
+    #download http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda_7.5.18_linux.run
+    #sudo bash $DOWNLOAD_DIR/cuda_7.5.18_linux.run --silent --toolkit
+    #echo '/usr/local/cuda-7.5/lib64' | sudo tee /etc/ld.so.conf.d/cuda.conf
+    #sudo ldconfig
 fi
 
 # Install other build tools
 info "Installing other build tools"
 sudo apt-get install -y build-essential cmake maven git gnome-terminal ffmpeg vim
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
 
 # Setup bash shell
 info "Setting up bash shell"
@@ -124,14 +126,15 @@ scripts/install-storm.sh
 ## Our project
 cd $HOME
 if [ -d video_analytics_at_scale ]; then
-    cd video_analytics_at_scale && git pull
+    cd video_analytics_at_scale && git lfs init && git pull && git checkout -f HEAD
 else
     git clone https://github.com/vlnguyen92/video_analytics_at_scale.git
+    cd video_analytics_at_scale && git lfs init
 fi
 
 if prompt "Basic setup done, proceed to javacpp compilation?"; then
-    scripts/compile-javacpp.sh linux-x86_64 "opencv,ffmpeg,caffe,caffeC3DSampleRate,caffeC3DOverlapLoss"
+    scripts/compile-javacpp.sh linux-x86_64 "opencv,caffe,caffeC3DSampleRate,caffeC3DOverlapLoss"
 fi
 
 ## Everything done
-info "Everything done successfully."
+info "Everything done successfully. Remember to reboot if GPU driver installed."
