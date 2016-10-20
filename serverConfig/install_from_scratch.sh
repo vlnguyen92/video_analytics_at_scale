@@ -70,8 +70,11 @@ fi
 
 # Install other build tools
 info "Installing other build tools"
-sudo apt-get install -y build-essential cmake maven git gnome-terminal ffmpeg vim
+sudo apt-get install -y build-essential cmake maven git gnome-terminal vim
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+sudo add-apt-repository ppa:mc3man/trusty-media && sudo apt-get update
+sudo apt-get install -y ffmpeg
+
 
 # Setup bash shell
 info "Setting up bash shell"
