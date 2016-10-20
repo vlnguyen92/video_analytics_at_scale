@@ -24,7 +24,11 @@ mvn install
 info "Building Javacpp-presets"
 ### dependencies
 sudo apt-get update && sudo apt-get install -y docker.io
-sudo systemctl start docker
+if command -v systemctl >/dev/null 2>&1; then
+    sudo systemctl start docker
+else
+    sudo service docker start
+fi
 ### source code
 cd $BUILD_DIR
 if [ -d javacpp-presets ]; then
