@@ -6,20 +6,12 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.apache.storm.utils.Utils;
-
-import org.bytedeco.javacpp.opencv_core.IplImage;
 import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_core.KeyPoint;
-import org.bytedeco.javacpp.opencv_features2d;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.FrameGrabber.Exception;
 import org.bytedeco.javacv.OpenCVFrameConverter;
-import com.clarity.stormCaffe.util.Serializable;
 
 import java.util.Map;
-import static com.clarity.stormCaffe.util.Constants.*;
 
 public class FrameGetterSpout extends BaseRichSpout {
     SpoutOutputCollector _collector;
@@ -57,8 +49,7 @@ public class FrameGetterSpout extends BaseRichSpout {
             OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
             mat = converter.convert(grabber.grabImage());
             if (mat != null) {
-                Serializable.CVMat sMat = new Serializable.CVMat(mat);
-                _collector.emit(new Values(sMat));
+                _collector.emit(new Values(mat));
             }
             //            mat = new Mat(image);
 

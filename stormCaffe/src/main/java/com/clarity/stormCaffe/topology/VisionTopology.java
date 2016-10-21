@@ -1,14 +1,14 @@
 package com.clarity.stormCaffe.topology;
 
-import com.clarity.stormCaffe.spout.*;
-import com.clarity.stormCaffe.bolt.*;
+import com.clarity.stormCaffe.bolt.AddBolt;
+import com.clarity.stormCaffe.bolt.FrameProcessorBolt;
+import com.clarity.stormCaffe.spout.FrameGetterSpout;
 import com.clarity.stormCaffe.util.Serializable;
-
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.tuple.Fields;
+import org.bytedeco.javacpp.opencv_core;
 
 public class VisionTopology 
 {
@@ -25,7 +25,7 @@ public class VisionTopology
 
         Config conf = new Config();
         conf.setDebug(true);
-        conf.registerSerialization(Serializable.CVMat.class);
+        conf.registerSerialization(opencv_core.Mat.class, Serializable.CVMatSerializer.class);
 
         if(args != null && args.length > 0) {
             conf.setNumWorkers(3);
