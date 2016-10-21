@@ -7,8 +7,6 @@ import com.esotericsoftware.kryo.io.Output;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.opencv_core;
 
-import java.nio.ByteBuffer;
-
 /**
  * This class provides kryo serialization for the JavaCV's CVMat and Rect objects, so that Storm can wrap them in tuples.
  * Serializable.CVMat - kryo serializable analog of opencv_core.Mat object.<p>
@@ -33,8 +31,8 @@ public class Serializable {
             output.writeInt(mat.cols());
             output.writeInt(mat.type());
             output.writeLong(mat.elemSize());
-	    byte[] data = new byte[(int) mat.elemSize()];
-    	    mat.data().get(data);
+            byte[] data = new byte[(int) mat.elemSize()];
+            mat.data().get(data);
             output.writeBytes(data);
         }
 
@@ -47,11 +45,8 @@ public class Serializable {
             byte[] data = input.readBytes((int) size);
 
             opencv_core.Mat mat = new opencv_core.Mat(rows, cols, type,
-                    new BytePointer(ByteBuffer.wrap(data)));
-            // Make sure we are using a safe copy
-            opencv_core.Mat copied = new opencv_core.Mat();
-            mat.copyTo(copied);
-            return copied;
+                    new BytePointer(data));
+            return mat;
         }
     }
 }
