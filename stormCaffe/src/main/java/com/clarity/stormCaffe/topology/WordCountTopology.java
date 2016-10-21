@@ -1,9 +1,8 @@
 package com.clarity.stormCaffe.topology;
 
-import com.clarity.stormCaffe.spout.*;
-import com.clarity.stormCaffe.bolt.*;
-import com.clarity.stormCaffe.util.Serializable;
-
+import com.clarity.stormCaffe.bolt.SplitSentenceBolt;
+import com.clarity.stormCaffe.bolt.WordCountBolt;
+import com.clarity.stormCaffe.spout.FrameGetterSpout;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
@@ -25,7 +24,6 @@ public class WordCountTopology
 
         Config conf = new Config();
         conf.setDebug(true);
-        conf.registerSerialization(Serializable.CVMat.class);
 
         if(args != null && args.length > 0) {
             conf.setNumWorkers(3);
