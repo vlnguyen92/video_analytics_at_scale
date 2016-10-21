@@ -34,7 +34,9 @@ public class Serializable {
             output.writeInt(mat.cols());
             output.writeInt(mat.type());
             output.writeLong(mat.elemSize());
-            output.writeBytes(mat.data().asBuffer().array());
+            byte[] data = new byte[(int) mat.elemSize()];
+            mat.data().get(data);
+            output.writeBytes(data);
         }
 
         @Override
