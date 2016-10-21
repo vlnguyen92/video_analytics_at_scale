@@ -47,7 +47,9 @@ public class Serializable {
 
             opencv_core.Mat mat = new opencv_core.Mat(rows, cols, type,
                     new BytePointer(data));
-            return mat;
+            opencv_core.Mat copied = new opencv_core.Mat();
+            mat.copyTo(copied);
+            return copied;
         }
     }
 }
