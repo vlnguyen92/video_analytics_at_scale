@@ -33,7 +33,7 @@ public class Classifier {
 
     public Classifier(String model,String training, String mean, String label) throws IOException {
         //this is where you set mode
-        Caffe.set_mode(Caffe.CPU);
+        Caffe.set_mode(Caffe.GPU);
         net_ = new FloatNet(model, caffe.TEST);
         net_.CopyTrainedLayersFrom(training);
         if(net_.num_inputs() != 1) {
@@ -94,6 +94,7 @@ public class Classifier {
         FloatRawIndexer indexer = sample_normalized.createIndexer();
         int length = ((int) indexer.width()) * ((int) indexer.height());
         int count = 0;
+	System.out.println("FLAGFLAG " + length + " " + indexer.channels());
         float[] data = new float[length * ((int) indexer.channels())];
         for (int z = 0; z < indexer.channels(); z++) {
             for (int x = 0; x < indexer.width(); x++) {
@@ -105,8 +106,7 @@ public class Classifier {
         }
 
         FloatBlob input_layer = net_.input_blobs().get(0);
-        input_layer.cpu_data().put(data);
-
+        input_layer.mutable_cpu_data().put(data);
     }
 
     private List<Float> predict(Mat img) {
@@ -121,7 +121,7 @@ public class Classifier {
 
         preprocess(img);
 
-        net_.ForwardPrefilled();
+        net_.Forward();
         FloatBlob output_layer = net_.output_blobs().get(0);
         FloatPointer begin = output_layer.cpu_data();
         List<Float> rvalue = new ArrayList<>();

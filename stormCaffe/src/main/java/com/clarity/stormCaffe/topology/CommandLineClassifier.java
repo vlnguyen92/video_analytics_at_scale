@@ -14,7 +14,7 @@ import static org.bytedeco.javacpp.opencv_core.Mat;
 public class CommandLineClassifier {
 
     public static void main(String[] args) throws Exception {
-        String rootDir = "/home/lvnguyen/video_analytics_at_scale/stormCaffe/";
+        String rootDir = "/home/cc/video_analytics_at_scale/stormCaffe/";
         String modelFile = rootDir + "resources/model/deploy.prototxt";
         String trainFile = rootDir + "resources/model/bvlc_googlenet.caffemodel";
         String meanFile = rootDir + "resources/model/imagenet_mean.binaryproto";

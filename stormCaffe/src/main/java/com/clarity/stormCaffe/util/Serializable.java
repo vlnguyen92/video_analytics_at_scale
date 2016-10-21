@@ -77,9 +77,9 @@ public class Serializable {
             this.cols = mat.cols();
             this.type = mat.type();
             int size = mat.arraySize();
-            this.data = new byte[size];
-            ByteBuffer buf = (ByteBuffer) mat.createBuffer();
-            buf.get(this.data);
+//            this.data = new byte[size];
+//            ByteBuffer buf = (ByteBuffer) mat.createBuffer();
+//            buf.get(this.data);
 //            System.out.println("HERE");
 
             //            ByteBuffer bb = mat.getByteBuffer();
@@ -211,11 +211,15 @@ public class Serializable {
 
         @Override
         public void write(Kryo kryo, Output output) {
-            output.writeInt(this.rows);
-            output.writeInt(this.cols);
-            output.writeInt(this.type);
-            output.writeInt(this.data.length);
-            output.writeBytes(this.data);
+            data = new byte[size];
+            ByteBuffer buf = (ByteBuffer) mat.createBuffer();
+            buf.get(data);
+
+            output.writeInt(rows);
+            output.writeInt(cols);
+            output.writeInt(type);
+            output.writeInt(data.length);
+            output.writeBytes(data);
         }
 
         @Override
@@ -231,373 +235,27 @@ public class Serializable {
     /**
      * Kryo Serializable Rect class.
      */
-    public static class Rect implements KryoSerializable, java.io.Serializable {
-        /**
-         * x, y, width, height - x and y coordinates of the left upper corner of the rectangle, its width and height
-         */
-        public int x, y, width, height;
-
-        public Rect() {
-        }
-
-        public Rect(opencv_core.Rect rect) {
-            x = rect.x();
-            y = rect.y();
-            width = rect.width();
-            height = rect.height();
-        }
-
-        public Rect(int x, int y, int width, int height) {
-            this.x = x;
-            this.y = y;
-            this.height = height;
-            this.width = width;
-        }
-
-        public opencv_core.Rect toJavaCVRect() {
-            return new opencv_core.Rect(x, y, width, height);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Rect rect = (Rect) o;
-
-            if (height != rect.height) return false;
-            if (width != rect.width) return false;
-            if (x != rect.x) return false;
-            if (y != rect.y) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = x;
-            result = 31 * result + y;
-            result = 31 * result + width;
-            result = 31 * result + height;
-            return result;
-        }
-
-        @Override
-        public void write(Kryo kryo, Output output) {
-            output.writeInt(x);
-            output.writeInt(y);
-            output.writeInt(width);
-            output.writeInt(height);
-        }
-
-        @Override
-        public void read(Kryo kryo, Input input) {
-            x = input.readInt();
-            y = input.readInt();
-            width = input.readInt();
-            height = input.readInt();
-        }
-    }
+ 
 
     /**
      * Kryo Serializable ScoredRect class. Subclass of Serializable.Rect, it includes a score for the rectangle.
      * The score would usually be used to represent a matched score (e.g. HOG matching).
      */
-    public static class ScoredRect extends Serializable.Rect implements java.io.Serializable, Comparable<ScoredRect> {
-        private static final long serialVersionUID = -6827975402116588963L;
 
-        /**
-         * Score of the rectangle. Usually used to represent the matched score.
-         */
-        public double score;
-        public String name;
-
-        public ScoredRect() {
-            super();
-        }
-
-        public ScoredRect(opencv_core.Rect rect) {
-            super(rect);
-        }
-
-        public ScoredRect(opencv_core.Rect rect, double score) {
-            super(rect);
-            this.score = score;
-        }
-
-        public ScoredRect(Serializable.Rect rect) {
-            this(rect.x, rect.y, rect.width, rect.height);
-        }
-
-        public ScoredRect(int x, int y, int width, int height) {
-            super(x, y, width, height);
-        }
-
-        public ScoredRect(int x, int y, int width, int height, double score) {
-            super(x, y, width, height);
-            this.score = score;
-        }
-
-        public boolean hasSameDimensions(Serializable.Rect that) {
-            return super.equals(that);
-        }
-
-        public int getX1() {
-            return x;
-        }
-
-        public int getX2() {
-            return x + width;
-        }
-
-        public int getY1() {
-            return y;
-        }
-
-        public int getY2() {
-            return y + height;
-        }
-
-        public int getArea() {
-            return width * height;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            ScoredRect rect = (ScoredRect) o;
-
-            if (height != rect.height) return false;
-            if (width != rect.width) return false;
-            if (x != rect.x) return false;
-            if (y != rect.y) return false;
-            if (score != score) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = x;
-            result = 31 * result + y;
-            result = 31 * result + width;
-            result = 31 * result + height;
-
-            result = result ^ Double.hashCode(score);
-
-            return result;
-        }
-
-        @Override
-        public int compareTo(ScoredRect that) {
-            return Double.compare(that.score, this.score);
-        }
-    }
 
     /**
      * This is a serializable class used for patch identification. Each patch needs to be distinguished form others.
      * Each patch is uniquely identified by the id of its frame and by the rectangle it corresponds to.
      */
-    public static class PatchIdentifier implements KryoSerializable, java.io.Serializable {
-        /**
-         * Frame id of this patch
-         */
-        public int frameId;
-        /**
-         * Rectangle or Region of Interest of this patch.
-         */
-        public Rect roi;
 
-        public PatchIdentifier() {
-        }
 
-        /**
-         * Creates PatchIdentifier with given frame id and rectangle.
-         *
-         * @param frameId
-         * @param roi
-         */
-        public PatchIdentifier(int frameId, Rect roi) {
-            this.roi = roi;
-            this.frameId = frameId;
-        }
 
-        @Override
-        public void write(Kryo kryo, Output output) {
-            output.writeInt(frameId);
-            output.writeInt(roi.x);
-            output.writeInt(roi.y);
-            output.writeInt(roi.width);
-            output.writeInt(roi.height);
-        }
-
-        @Override
-        public void read(Kryo kryo, Input input) {
-            frameId = input.readInt();
-            int x = input.readInt();
-            int y = input.readInt();
-            int width = input.readInt();
-            int height = input.readInt();
-            roi = new Rect(x, y, width, height);
-        }
-
-        /**
-         * String representation of this patch identifier.
-         *
-         * @return the string in the format N%04d@%04d@%04d@%04d@%04d if roi is not null, and N%04d@null otherwise.
-         */
-        public String toString() {
-            if (roi != null)
-                return String.format("N%04d@%04d@%04d@%04d@%04d", frameId, roi.x, roi.y, roi.x + roi.width, roi.y + roi.height);
-            return String.format("N%04d@null", frameId);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            PatchIdentifier that = (PatchIdentifier) o;
-
-            if (frameId != that.frameId) return false;
-            if (roi != null ? !roi.equals(that.roi) : that.roi != null) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = frameId;
-            result = 31 * result + (roi != null ? roi.hashCode() : 0);
-            return result;
-        }
-    }
-
-    public static class CvPoint2D32f implements KryoSerializable, java.io.Serializable {
-        float x;
-        float y;
-
-        public CvPoint2D32f() {
-        }
-
-        public CvPoint2D32f(opencv_core.CvPoint2D32f p) {
-            this.x = p.x();
-            this.y = p.y();
-        }
-
-        public CvPoint2D32f(CvPoint2D32f p) {
-            this.x = p.x();
-            this.y = p.y();
-        }
-
-        public opencv_core.CvPoint2D32f toJavaCvPoint2D32f() {
-            return new opencv_core.CvPoint2D32f().x(this.x).y(this.y);
-        }
-
-        public float x() {
-            return this.x;
-        }
-
-        public float y() {
-            return this.y;
-        }
-
-        public void x(float x) {
-            this.x = x;
-        }
-
-        public void y(float y) {
-            this.y = y;
-        }
-
-        @Override
-        public void write(Kryo kryo, Output output) {
-            output.writeFloat(this.x);
-            output.writeFloat(this.y);
-        }
-
-        @Override
-        public void read(Kryo kryo, Input input) {
-            this.x = input.readFloat();
-            this.y = input.readFloat();
-        }
-    }
 
     /**
      * This is a serializable class used for patch identification. Each patch needs to be distinguished form others.
      * Each patch is uniquely identified by the id of its frame and by the rectangle it corresponds to.
      */
-    public static class PatchIdentifierCVMat implements java.io.Serializable {
 
-        public PatchIdentifier identifier;
-        public CVMat sCVMat;
-
-
-        /**
-         * Creates PatchIdentifier with given frame id and rectangle.
-         * @param frameId
-         * @param roi
-         * @param sCVMat
-         */
-        public PatchIdentifierCVMat(int frameId, Rect roi, CVMat sCVMat) {
-            this.identifier = new PatchIdentifier(frameId, roi);
-            this.sCVMat = sCVMat;
-        }
-
-        /**
-         * String representation of this patch identifier.
-         *
-         * @return the string in the format N%04d@%04d@%04d@%04d@%04d if roi is not null, and N%04d@null otherwise.
-         */
-        public String toString() {
-            return this.identifier.toString();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            PatchIdentifierCVMat that = (PatchIdentifierCVMat) o;
-            return this.identifier.equals(that.identifier);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.identifier.hashCode();
-        }
-    }
-
-    public static byte[] CvCVMat2ByteArray(opencv_core.Mat mat) {
-        if (!mat.isContinuous()) {
-            mat = mat.clone();
-        }
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out = null;
-        try {
-            out = new ObjectOutputStream(bos);
-            out.writeInt(mat.rows());
-            out.writeInt(mat.cols());
-            out.writeInt(mat.type());
-            out.writeInt(mat.arraySize());
-
-            byte[] data = new byte[mat.arraySize()];
-            ByteBuffer buf = (ByteBuffer) mat.createBuffer();
-            buf.get(data);
-            out.write(data);
-            out.close();
-            byte[] int_bytes = bos.toByteArray();
-            bos.close();
-
-            //System.out.println("out: " + this.rows + "-" + this.cols + "-" + this.type + "-" + this.data.length + "-" + int_bytes.length);
-            return int_bytes;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     public static opencv_core.Mat ByteArray2CvCVMat(byte[] input){
         ByteArrayInputStream bis = new ByteArrayInputStream(input);
