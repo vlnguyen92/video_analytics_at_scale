@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * Created by Aetf (aetf at unlimitedcodeworks dot xyz) on 16-10-17.
  */
-public class NetForward extends FrameProcessor {
+public class NetForwardOL extends FrameProcessor {
     String model;
     String weight;
     String outputBlobName;
@@ -26,11 +26,11 @@ public class NetForward extends FrameProcessor {
     caffeC3DOverlapLoss.FloatBlob outputBlob;
     opencv_core.Size inputGeometry;
 
-    public NetForward(String model, String weight, boolean useGPU) {
+    public NetForwardOL(String model, String weight, boolean useGPU) {
         this(model, weight, "", useGPU);
     }
 
-    public NetForward(String model, String weight, String outputLayer, boolean useGPU) {
+    public NetForwardOL(String model, String weight, String outputLayer, boolean useGPU) {
         this.model = model;
         this.weight = weight;
         this.outputBlobName = outputLayer;

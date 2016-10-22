@@ -11,6 +11,7 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.bytedeco.javacpp.opencv_core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,8 @@ public class FrameBolt extends BaseRichBolt {
         this.collector = collector;
         this.boltName = context.getThisComponentId();
 
-        Config.registerSerialization(stormConf, Serializable.CVMat.class);
+        Config.registerSerialization(stormConf, opencv_core.Mat.class,
+                                     Serializable.CVMatSerializer.class);
         Config.registerSerialization(stormConf, Frame.class);
 
         try {

@@ -9,6 +9,7 @@ import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
+import org.bytedeco.javacpp.opencv_core;
 
 public class WordCountTopology 
 {
@@ -25,7 +26,7 @@ public class WordCountTopology
 
         Config conf = new Config();
         conf.setDebug(true);
-        conf.registerSerialization(Serializable.CVMat.class);
+        conf.registerSerialization(opencv_core.Mat.class, Serializable.CVMatSerializer.class);
 
         if(args != null && args.length > 0) {
             conf.setNumWorkers(3);

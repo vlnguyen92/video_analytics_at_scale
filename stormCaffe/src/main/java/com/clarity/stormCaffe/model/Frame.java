@@ -1,6 +1,5 @@
 package com.clarity.stormCaffe.model;
 
-import com.clarity.stormCaffe.util.Serializable;
 import org.bytedeco.javacpp.opencv_core;
 
 import java.util.HashMap;
@@ -9,7 +8,7 @@ import java.util.HashMap;
  * Created by Aetf (aetf at unlimitedcodeworks dot xyz) on 16-10-17.
  */
 public class Frame {
-    Serializable.CVMat image;
+    opencv_core.Mat image;
     HashMap<String, Object> metadata;
 
     public Frame(opencv_core.Mat mat) {
@@ -18,11 +17,11 @@ public class Frame {
     }
 
     public opencv_core.Mat getImage() {
-        return image.toJavaCVMat();
+        return image;
     }
 
     public void setImage(opencv_core.Mat mat) {
-        image = new Serializable.CVMat(mat);
+        image = mat;
     }
 
     public HashMap<String, Object> getMetadata() {
