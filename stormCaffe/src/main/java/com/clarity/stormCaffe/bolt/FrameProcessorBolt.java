@@ -41,22 +41,18 @@ public class FrameProcessorBolt extends BaseRichBolt{
     public void execute(Tuple tuple) {
         Serializable.CVMat smat = (Serializable.CVMat) tuple.getValueByField("raw-frame");
         Mat img = smat.toJavaCVMat();
-        classifier.classify(img,2).get(0).getLeft();
+        String classified = classifier.classify(img,2).get(0).getLeft();
         
         if(smat == null) {
             System.out.println("NULLPOINTER");
         }
 
-        int W = smat.getCols();
-        int H = smat.getRows();
-
-        collector.emit(tuple, new Values(H,W));
+        collector.emit(tuple, new Values(classified));
         collector.ack(tuple);
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-//        declarer.declare(new Fields());
-        declarer.declare(new Fields("height","width"));
+        declarer.declare(new Fields("classified-class"));
     }
 }

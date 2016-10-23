@@ -10,6 +10,8 @@ import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 
+import com.clarity.stormCaffe.util.Serializable.CVMat;
+
 public class VisionTopology 
 {
     public static void main( String[] args ) throws Exception
@@ -17,11 +19,11 @@ public class VisionTopology
         TopologyBuilder builder = new TopologyBuilder();
 
         String file = "/home/cc/video_data/testvid.mp4";
-        builder.setSpout("spout", new FrameGetterSpout(file), 1);
+        builder.setSpout("spout", new FrameGetterSpout(file, 40), 1);
 
-        builder.setBolt("get-dimension", new FrameProcessorBolt(), 1).shuffleGrouping("spout");
+        builder.setBolt("classifier", new FrameProcessorBolt(), 1).shuffleGrouping("spout");
 
-        builder.setBolt("add", new AddBolt(), 1).shuffleGrouping("get-dimension");
+//        builder.setBolt("add", new AddBolt(), 1).shuffleGrouping("get-dimension");
 
         Config conf = new Config();
         conf.setDebug(true);
@@ -29,7 +31,7 @@ public class VisionTopology
 
         if(args != null && args.length > 0) {
             conf.setNumWorkers(3);
-            StormSubmitter.submitTopologyWithProgressBar("vision",conf,builder.createTopology());
+            StormSubmitter.submitTopologyWithProgressBar(args[0],conf,builder.createTopology());
         }
         else {
             conf.setMaxTaskParallelism(3);
