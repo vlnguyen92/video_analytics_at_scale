@@ -74,7 +74,9 @@ public class FrameGetterSpout extends BaseRichSpout {
             //Emit cv Mat 
             try {
                 OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
+                long start = System.nanoTime();
                 mat = converter.convert(grabber.grabImage());
+                System.out.println("TIMER " + (System.nanoTime() - start));
                 if (mat != null) {
                     Serializable.CVMat sMat = new Serializable.CVMat(mat);
                     _collector.emit(new Values(sMat), new SentWithTime(sMat, nextFrameEmitTime - stepBwFrameNano));
@@ -97,10 +99,9 @@ public class FrameGetterSpout extends BaseRichSpout {
 
     @Override 
     public void fail(Object id) {
-        SentWithTime st = (SentWithTime)id;
+        SentWithTime st = (SentWithTime) id;
         _collector.emit(new Values(st.mat), id);
     }
-
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
